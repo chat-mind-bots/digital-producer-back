@@ -1,0 +1,17 @@
+import { Module } from '@nestjs/common';
+import { BotService } from './bot.service';
+import { BotController } from './bot.controller';
+import { TelegrafModule } from 'nestjs-telegraf';
+import { ConfigModule } from '@nestjs/config';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot(),
+    TelegrafModule.forRoot({
+      token: process.env.TELEGRAM_API_KEY,
+    }),
+  ],
+  providers: [BotService],
+  controllers: [BotController]
+})
+export class BotModule {}
