@@ -5,7 +5,9 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BotModule } from './bot/bot.module';
 import * as path from 'path';
-import {AcceptLanguageResolver, I18nModule, QueryResolver} from 'nestjs-i18n';
+import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import { BannerModule } from './banner/banner.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -14,7 +16,7 @@ import {AcceptLanguageResolver, I18nModule, QueryResolver} from 'nestjs-i18n';
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: path.join(__dirname, '/i18n/'),
+        path: path.join(__dirname, '/apps/api/i18n/'),
         watch: true,
       },
       resolvers: [
@@ -23,6 +25,8 @@ import {AcceptLanguageResolver, I18nModule, QueryResolver} from 'nestjs-i18n';
       ],
     }),
     BotModule,
+    BannerModule,
+    TagsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
