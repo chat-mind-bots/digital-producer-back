@@ -4,20 +4,22 @@ import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 import {
   IsArray,
   IsEnum,
+  IsOptional,
   IsString,
   IsUrl,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateBannerDto {
+export class PatchBannerDto {
   @ApiProperty({
     example: 'Banner about IT',
     description: 'Banner title',
     required: true,
   })
   @IsString()
-  readonly title: string;
+  @IsOptional()
+  readonly title?: string;
 
   @ApiProperty({
     example: BannerTypeEnum.SLIDER,
@@ -34,7 +36,8 @@ export class CreateBannerDto {
   })
   @IsString()
   @IsEnum(BannerTypeEnum)
-  readonly type: BannerTypeEnum;
+  @IsOptional()
+  readonly type?: BannerTypeEnum;
 
   @ApiProperty({
     example: 'https://www.google.com/',
@@ -42,7 +45,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsUrl()
-  readonly urlButton: string;
+  @IsOptional()
+  readonly urlButton?: string;
 
   @ApiProperty({
     example: 'Go to page',
@@ -50,7 +54,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly textButton: string;
+  @IsOptional()
+  readonly textButton?: string;
 
   @ApiProperty({
     example: '{border-color: 1px solid red}',
@@ -58,7 +63,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly styleButton: string;
+  @IsOptional()
+  readonly styleButton?: string;
 
   @ApiProperty({
     example: 'Banner name',
@@ -66,7 +72,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly name: string;
+  @IsOptional()
+  readonly name?: string;
 
   @ApiProperty({
     example: 'Smth... about banner',
@@ -74,7 +81,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly description: string;
+  @IsOptional()
+  readonly description?: string;
 
   @ApiProperty({
     example: 'USER',
@@ -82,7 +90,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly role: string;
+  @IsOptional()
+  readonly role?: string;
 
   @ApiProperty({
     example: 'https://www.google.com/image.png',
@@ -90,7 +99,8 @@ export class CreateBannerDto {
     required: true,
   })
   @IsUrl()
-  readonly image: string;
+  @IsOptional()
+  readonly image?: string;
 
   @ApiProperty({
     required: true,
@@ -100,5 +110,6 @@ export class CreateBannerDto {
   // @Type(() => CreateTagDto)
   @Type(() => CreateTagDto)
   @ValidateNested({ each: true })
-  readonly tags!: CreateTagDto[];
+  @IsOptional()
+  readonly tags?: CreateTagDto[];
 }
