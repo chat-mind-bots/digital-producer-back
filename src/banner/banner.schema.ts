@@ -15,11 +15,15 @@ export class Banner {
   @ApiProperty()
   @Prop({
     required: true,
-    type: Number,
+    type: String,
     enum: BannerTypeEnum,
     default: BannerTypeEnum.SLIDER,
   })
-  type: number;
+  type: string;
+
+  @ApiProperty()
+  @Prop({ required: true })
+  role: string;
 
   @ApiProperty()
   @Prop({ required: true })
@@ -44,10 +48,6 @@ export class Banner {
   @ApiProperty()
   @Prop({ required: true })
   image: string;
-
-  @ApiProperty()
-  @Prop({ required: true })
-  role: string;
 
   // @Prop({
   //   required: false,

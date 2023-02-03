@@ -16,7 +16,12 @@ export class TagsService {
   }
 
   async createManyTags(dtos: CreateTagDto[]) {
-    const tags = dtos.map(async (dto) => await this.createTag(dto));
+    const tags = [];
+    for (const dto of dtos) {
+      const tag = await this.createTag(dto);
+      tags.push(tag);
+    }
+    // const tags = dtos.map(async (dto) => await this.createTag(dto));
     return tags;
   }
 
