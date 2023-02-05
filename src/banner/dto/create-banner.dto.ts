@@ -9,6 +9,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 export class CreateBannerDto {
   @ApiProperty({
@@ -77,12 +78,16 @@ export class CreateBannerDto {
   readonly description: string;
 
   @ApiProperty({
-    example: 'USER',
-    description: 'role visible',
+    example: UserRoleEnum.USER,
+    description: 'User role who can see banner',
     required: true,
+    enum: UserRoleEnum,
+    examples: [UserRoleEnum.USER, UserRoleEnum.PRODUCER],
+    type: String,
   })
   @IsString()
-  readonly role: string;
+  @IsEnum(UserRoleEnum)
+  readonly role: UserRoleEnum;
 
   @ApiProperty({
     example: 'https://www.google.com/image.png',

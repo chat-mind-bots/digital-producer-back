@@ -3,6 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { toNumber } from 'src/common/helpers/query.helper';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 export class BannerGetQueryDto {
   @ApiProperty({
@@ -36,11 +37,14 @@ export class BannerGetQueryDto {
   readonly type?: BannerTypeEnum;
 
   @ApiProperty({
-    example: 'PRODUCER',
+    example: UserRoleEnum.USER,
     description: 'user role',
     required: false,
+    type: String,
+    enum: UserRoleEnum,
   })
   @IsString()
+  @IsEnum(UserRoleEnum)
   @IsOptional()
-  readonly role?: string;
+  readonly role?: UserRoleEnum;
 }
