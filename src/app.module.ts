@@ -8,11 +8,18 @@ import * as path from 'path';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { BannerModule } from './banner/banner.module';
 import { TagsModule } from './tags/tags.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_URI),
+    MongooseModule.forRoot(process.env.MONGO_URI, {
+      connectionFactory: (connection) => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        connection.plugin(require('mongoose-autopopulate'));
+        return connection;
+      },
+    }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
@@ -27,6 +34,7 @@ import { TagsModule } from './tags/tags.module';
     BotModule,
     BannerModule,
     TagsModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
