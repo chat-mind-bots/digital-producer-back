@@ -1,8 +1,11 @@
-import { InjectBot, Start, Update } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
+import { Ctx, InjectBot, Message, On, Start, Update } from 'nestjs-telegraf';
+import { Context, Markup, Telegraf } from 'telegraf';
 import { forwardRef, Inject } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
+import { Public } from 'src/auth/public-route.decorator';
+import { isPrivate } from 'src/bot/bot.utils';
+import { AuthService } from 'src/auth/auth.service';
 
 @Update()
 export class BotUpdate {
@@ -10,14 +13,22 @@ export class BotUpdate {
     @InjectBot() private readonly bot: Telegraf<Context>,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
+  @Public()
   @Start()
   async startCommand(ctx: Context) {
     const oldUser = await this.userService.findByTGId(ctx.from.id);
     if (oldUser) {
       await ctx.sendMessage(
         `Hi, ${oldUser.first_name}, your role is ${oldUser.role}`,
+        {
+          reply_markup: {
+            keyboard: [[{ text: 'Получить токен' }]],
+          },
+        },
       );
       return;
     }
@@ -46,7 +57,35 @@ export class BotUpdate {
       type,
       photos,
     });
-    await ctx.sendMessage(`Hi, ${user.first_name}, your role is ${user.role}`);
+    await ctx.sendMessage(`Hi, ${user.first_name}, your role is ${user.role}`, {
+      reply_markup: {
+        keyboard: [[{ text: 'Получить токен' }]],
+      },
+    });
+    return;
+  }
+
+  @Public()
+  @On('message')
+  async messageHandler(@Message('text') msg: string, @Ctx() ctx: Context) {
+    if (isPrivate(ctx.chat.type)) {
+      const { from } = ctx.message;
+      if (msg === 'Получить токен') {
+        const { access_token } = await this.authService.login(
+          from.first_name,
+          from.id,
+        );
+        const href = `${process.env.FRONT_URL}/auth/${access_token}`;
+        await ctx.reply(
+          `Ваша ссылка для входа: ${
+            process.env.MODE === 'DEVELOP' ? href : ''
+          }`,
+          process.env.MODE !== 'DEVELOP'
+            ? Markup.inlineKeyboard([Markup.button.url(href, href)])
+            : {},
+        );
+      }
+    }
     return;
   }
 }

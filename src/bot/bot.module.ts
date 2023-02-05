@@ -5,6 +5,7 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { ConfigModule } from '@nestjs/config';
 import { BotUpdate } from 'src/bot/bot.update';
 import { UserModule } from 'src/user/user.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UserModule } from 'src/user/user.module';
       token: process.env.TELEGRAM_API_KEY,
     }),
     forwardRef(() => UserModule),
+    forwardRef(() => AuthModule),
   ],
   providers: [BotService, BotUpdate],
   controllers: [BotController],
