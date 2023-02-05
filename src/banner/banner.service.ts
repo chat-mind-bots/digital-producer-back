@@ -12,6 +12,7 @@ import { CreateBannerDto } from 'src/banner/dto/create-banner.dto';
 import { TagsService } from 'src/tags/tags.service';
 import { BannerTypeEnum } from 'src/banner/enums/banner-type.enum';
 import { PatchBannerDto } from 'src/banner/dto/patch-banner.dto';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 @Injectable()
 export class BannerService {
@@ -26,14 +27,15 @@ export class BannerService {
     limit: number,
     offset: number,
     type?: BannerTypeEnum,
-    role?: string,
+    userRole?: UserRoleEnum,
   ) {
     const filters = {};
     if (type) {
       filters['type'] = type;
     }
-    if (role) {
-      filters['role'] = role;
+
+    if (userRole) {
+      filters['role'] = userRole;
     }
     const banners = await this.bannerModel
       .find(filters)

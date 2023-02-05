@@ -3,6 +3,7 @@ import { Document, now, Types } from 'mongoose';
 import { BannerTypeEnum } from 'src/banner/enums/banner-type.enum';
 import { Tag } from 'src/tags/tags.schema';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 export type BannerDocument = Banner & Document;
 
@@ -22,8 +23,13 @@ export class Banner {
   type: string;
 
   @ApiProperty()
-  @Prop({ required: true })
-  role: string;
+  @Prop({
+    required: true,
+    default: UserRoleEnum.USER,
+    type: String,
+    enum: UserRoleEnum,
+  })
+  role: UserRoleEnum;
 
   @ApiProperty()
   @Prop({ required: true })
