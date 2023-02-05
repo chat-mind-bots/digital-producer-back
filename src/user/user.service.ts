@@ -1,0 +1,34 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserDocument } from 'src/user/user.schema';
+import { Model } from 'mongoose';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+
+@Injectable()
+export class UserService {
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+  ) {}
+
+  async findByTGId(tg_id: number) {
+    const user = await this.userModel.findOne({ tg_id });
+    return user;
+  }
+
+  async findById(id: string) {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new HttpException('Document not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
+  }
+
+  async createUser(dto: CreateUserDto) {
+    const oldUser = await this.findByTGId(dto.tg_id);
+    if (oldUser) {
+      return oldUser;
+    }
+    const user = await this.userModel.create(dto);
+    return user;
+  }
+}

@@ -21,7 +21,6 @@ export class TagsService {
       const tag = await this.createTag(dto);
       tags.push(tag);
     }
-    // const tags = dtos.map(async (dto) => await this.createTag(dto));
     return tags;
   }
 
