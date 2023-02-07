@@ -2,10 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 // import { ValidationPipe } from 'src/pipes/validation.pipe';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Swagger')

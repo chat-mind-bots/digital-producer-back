@@ -16,6 +16,7 @@ import { BannerService } from 'src/banner/banner.service';
 import { BannerGetQueryDto } from 'src/banner/dto/query/banner-get-query.dto';
 import { PatchBannerDto } from 'src/banner/dto/patch-banner.dto';
 import { MongoIdPipe } from 'src/pipes/mongo-id.pipe';
+import { RequestArrayType } from 'src/banner/types/request-array.type';
 
 @Controller('banner')
 @ApiTags('banner')
@@ -29,7 +30,7 @@ export class BannerController {
   }
 
   @ApiOperation({ summary: 'Get banners list' })
-  @ApiResponse({ status: 200, type: [Banner] })
+  @ApiResponse({ status: 200, type: RequestArrayType })
   @Get()
   async getBanners(@Query() query: BannerGetQueryDto) {
     const { limit, offset, type, role } = query;
