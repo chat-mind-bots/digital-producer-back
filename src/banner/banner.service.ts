@@ -13,6 +13,7 @@ import { TagsService } from 'src/tags/tags.service';
 import { BannerTypeEnum } from 'src/banner/enums/banner-type.enum';
 import { PatchBannerDto } from 'src/banner/dto/patch-banner.dto';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
+import { RequestArrayType } from 'src/banner/types/request-array.type';
 
 @Injectable()
 export class BannerService {
@@ -28,7 +29,7 @@ export class BannerService {
     offset: number,
     type?: BannerTypeEnum,
     userRole?: UserRoleEnum,
-  ) {
+  ): Promise<RequestArrayType> {
     const filters = {};
     if (type) {
       filters['type'] = type;
@@ -42,7 +43,12 @@ export class BannerService {
       .limit(limit)
       .skip(offset)
       .populate('tags');
-    return banners;
+
+    const total = await this.bannerModel.countDocuments({ ...filters }).exec();
+    return {
+      data: banners,
+      total,
+    };
   }
 
   async getBannerById(id: string) {
