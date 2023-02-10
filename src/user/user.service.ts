@@ -47,8 +47,6 @@ export class UserService {
         { first_name: { $regex: q, $options: 'i' } },
       ];
     }
-    console.log(q);
-    console.log(searchQuery);
     const users = await this.userModel
       .find({ ...searchQuery })
       .limit(limit)
