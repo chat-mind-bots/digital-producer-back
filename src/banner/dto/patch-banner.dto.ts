@@ -47,7 +47,15 @@ export class PatchBannerDto {
   })
   @IsUrl()
   @IsOptional()
-  readonly urlButton?: string;
+  readonly url_button?: string;
+
+  @ApiProperty({
+    example: 'https://www.google.com',
+    description: 'Url to another source',
+    required: false,
+  })
+  @IsUrl()
+  readonly third_party_source?: string;
 
   @ApiProperty({
     example: 'Go to page',
@@ -56,7 +64,7 @@ export class PatchBannerDto {
   })
   @IsString()
   @IsOptional()
-  readonly textButton?: string;
+  readonly text_button?: string;
 
   @ApiProperty({
     example: '{border-color: 1px solid red}',
@@ -65,7 +73,7 @@ export class PatchBannerDto {
   })
   @IsString()
   @IsOptional()
-  readonly styleButton?: string;
+  readonly style_button?: string;
 
   @ApiProperty({
     example: 'Banner name',

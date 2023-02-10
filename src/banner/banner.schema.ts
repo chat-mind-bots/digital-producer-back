@@ -33,15 +33,15 @@ export class Banner {
 
   @ApiProperty()
   @Prop({ required: true })
-  urlButton: string;
+  url_button: string;
 
   @ApiProperty()
   @Prop({ required: true })
-  textButton: string;
+  text_button: string;
 
   @ApiProperty()
   @Prop({ required: true })
-  styleButton: string;
+  style_button: string;
 
   @ApiProperty()
   @Prop({ required: true })
@@ -54,6 +54,10 @@ export class Banner {
   @ApiProperty()
   @Prop({ required: true })
   image: string;
+
+  @ApiProperty()
+  @Prop({ required: false })
+  third_party_source: string;
 
   // @Prop({
   //   required: false,

@@ -43,7 +43,7 @@ export class CreateBannerDto {
     required: true,
   })
   @IsUrl()
-  readonly urlButton: string;
+  readonly url_button: string;
 
   @ApiProperty({
     example: 'Go to page',
@@ -51,7 +51,7 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly textButton: string;
+  readonly text_button: string;
 
   @ApiProperty({
     example: '{border-color: 1px solid red}',
@@ -59,7 +59,7 @@ export class CreateBannerDto {
     required: true,
   })
   @IsString()
-  readonly styleButton: string;
+  readonly style_button: string;
 
   @ApiProperty({
     example: 'Banner name',
@@ -76,6 +76,14 @@ export class CreateBannerDto {
   })
   @IsString()
   readonly description: string;
+
+  @ApiProperty({
+    example: 'https://www.google.com',
+    description: 'Url to another source',
+    required: false,
+  })
+  @IsUrl()
+  readonly third_party_source: string;
 
   @ApiProperty({
     example: UserRoleEnum.USER,
