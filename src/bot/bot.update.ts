@@ -71,9 +71,11 @@ export class BotUpdate {
     if (isPrivate(ctx.chat.type)) {
       const { from } = ctx.message;
       if (msg === 'Получить токен') {
+        const user = await this.userService.findByTGId(from.id);
         const { access_token } = await this.authService.login(
-          from.first_name,
-          from.id,
+          user.first_name,
+          user.tg_id,
+          user.role,
         );
         const href = `${process.env.FRONT_URL}/auth/${access_token}`;
         await ctx.reply(
