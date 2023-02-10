@@ -38,4 +38,27 @@ export class UserService {
     await user.update({ role: [...user.role, role] });
     return await this.findById(id);
   }
+
+  async findAll(limit: number, offset: number, q: string) {
+    const searchQuery = {};
+    if (q) {
+      searchQuery['$or'] = [
+        { userName: { $regex: q, $options: 'i' } },
+        { first_name: { $regex: q, $options: 'i' } },
+      ];
+    }
+
+    const users = await this.userModel
+      .find({ ...searchQuery })
+      .limit(limit)
+      .skip(offset);
+    const total = await this.userModel
+      .countDocuments({ ...searchQuery })
+      .exec();
+
+    return {
+      data: users,
+      total,
+    };
+  }
 }

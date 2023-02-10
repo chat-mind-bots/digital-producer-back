@@ -1,10 +1,12 @@
-import { Controller, Param, Post, UsePipes } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UsePipes } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MongoIdPipe } from 'src/pipes/mongo-id.pipe';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/user.schema';
+import { RequestArrayType } from './types/request-array.type';
+import { UserGetQueryDto } from 'src/user/dto/query/user-get-query.dto';
 
 @Controller('user')
 @ApiTags('user')
@@ -36,5 +38,14 @@ export class UserController {
   @Post('/upgrade-to-super-admin/:id')
   async updateToSuperAdmin(@Param('id') id: string) {
     return this.userService.updateUserRole(id, UserRoleEnum.SUPER_ADMIN);
+  }
+
+  @ApiOperation({ summary: 'Get users list' })
+  @ApiResponse({ status: 200, type: RequestArrayType })
+  @Roles(UserRoleEnum.PRODUCER)
+  @Get()
+  async getUsers(@Query() query: UserGetQueryDto) {
+    const { q, offset, limit } = query;
+    return this.userService.findAll(limit, offset, q);
   }
 }
