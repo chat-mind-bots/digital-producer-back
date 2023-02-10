@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
-import { toNumber } from 'src/common/helpers/query.helper';
+import { toLowerCase, toNumber, trim } from 'src/common/helpers/query.helper';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserGetQueryDto {
@@ -22,6 +22,7 @@ export class UserGetQueryDto {
   @IsNumber()
   readonly offset: number;
 
+  @Transform(({ value }) => trim(toLowerCase(value)))
   @ApiProperty({
     example: 'John',
     description: 'username or first_name',
