@@ -43,11 +43,10 @@ export class UserService {
     const searchQuery = {};
     if (q) {
       searchQuery['$or'] = [
-        { userName: { $regex: q, $options: 'i' } },
+        { username: { $regex: q, $options: 'i' } },
         { first_name: { $regex: q, $options: 'i' } },
       ];
     }
-
     const users = await this.userModel
       .find({ ...searchQuery })
       .limit(limit)
