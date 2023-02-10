@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from 'src/user/user.schema';
 import { Model } from 'mongoose';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -30,5 +31,11 @@ export class UserService {
     }
     const user = await this.userModel.create(dto);
     return user;
+  }
+
+  async updateUserRole(id: string, role: UserRoleEnum) {
+    const user = await this.findById(id);
+    await user.update({ role: [...user.role, role] });
+    return await this.findById(id);
   }
 }
