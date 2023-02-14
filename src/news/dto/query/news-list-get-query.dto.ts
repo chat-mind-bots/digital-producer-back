@@ -4,7 +4,7 @@ import { toNumber } from 'src/common/helpers/query.helper';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
-export class NewsCategoriesListGetQueryDto {
+export class NewsListGetQueryDto {
   @ApiProperty({
     example: 5,
     description: 'limit',
@@ -34,4 +34,13 @@ export class NewsCategoriesListGetQueryDto {
   @IsEnum(UserRoleEnum)
   @IsOptional()
   readonly role?: UserRoleEnum;
+
+  @ApiProperty({
+    example: '8g3...',
+    description: 'News categoty id',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  readonly 'category-id': string;
 }

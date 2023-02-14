@@ -11,66 +11,66 @@ import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 import { Type } from 'class-transformer';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
-export class CreateNewsDto {
+export class PatchNewsDto {
   @ApiProperty({
     example: 'Something name',
     description: 'News list object name',
-    required: true,
+    required: false,
   })
   @IsString()
-  readonly name: string;
+  readonly name?: string;
 
   @ApiProperty({
     example: UserRoleEnum.USER,
     description: 'User role who can see type',
-    required: true,
+    required: false,
     enum: UserRoleEnum,
     examples: [UserRoleEnum.USER, UserRoleEnum.PRODUCER],
     type: String,
   })
   @IsString()
   @IsEnum(UserRoleEnum)
-  readonly role: UserRoleEnum;
+  readonly role?: UserRoleEnum;
 
   @ApiProperty({
     example: 'Something description',
     description: 'News list object description',
-    required: true,
+    required: false,
   })
   @IsString()
-  readonly description: string;
+  readonly description?: string;
 
   @ApiProperty({
     example: '111',
     description: 'Time reade of type in ms',
-    required: true,
+    required: false,
   })
   @IsNumber()
-  readonly time_read: number;
+  readonly time_read?: number;
 
   @ApiProperty({
-    example: '84fff..',
-    description: 'News category id',
-    required: true,
+    example: 'Something name',
+    description: 'News list object name',
+    required: false,
   })
   @IsString()
-  readonly category_id: string;
+  readonly category_id?: string;
 
   @ApiProperty({
     example: 'https://www.google.com/image.png',
     description: 'Image url',
-    required: true,
+    required: false,
   })
   @IsUrl()
-  readonly image: string;
+  readonly image?: string;
 
   @ApiProperty({
-    required: true,
+    required: false,
     type: () => [CreateTagDto],
   })
   @IsArray()
   // @Type(() => CreateTagDto)
   @Type(() => CreateTagDto)
   @ValidateNested({ each: true })
-  readonly tags!: CreateTagDto[];
+  readonly tags?: CreateTagDto[];
 }
