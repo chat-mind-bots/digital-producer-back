@@ -15,6 +15,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { NewsModule } from './news/news.module';
+import { CourseModule } from './course/course.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { NewsModule } from './news/news.module';
     AuthModule,
     JwtModule,
     NewsModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [
