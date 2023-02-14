@@ -57,7 +57,7 @@ export class Banner {
 
   @ApiProperty()
   @Prop({ required: false })
-  third_party_source: string;
+  is_third_party_source: boolean;
 
   // @Prop({
   //   required: false,

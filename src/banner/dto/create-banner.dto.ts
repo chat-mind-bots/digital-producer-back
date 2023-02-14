@@ -83,7 +83,7 @@ export class CreateBannerDto {
     required: false,
   })
   @IsUrl()
-  readonly third_party_source: string;
+  readonly is_third_party_source: string;
 
   @ApiProperty({
     example: UserRoleEnum.USER,
