@@ -5,7 +5,7 @@ import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 export class PatchNewsCategoryDto {
   @ApiProperty({
     example: 'News about IT',
-    description: 'type title',
+    description: 'news title',
     required: false,
   })
   @IsString()
@@ -13,7 +13,7 @@ export class PatchNewsCategoryDto {
 
   @ApiProperty({
     example: UserRoleEnum.USER,
-    description: 'User role who can see type',
+    description: 'User role who can see news',
     required: false,
     enum: UserRoleEnum,
     examples: [UserRoleEnum.USER, UserRoleEnum.PRODUCER],
@@ -25,7 +25,7 @@ export class PatchNewsCategoryDto {
 
   @ApiProperty({
     example: '#FFFF',
-    description: 'type rags color',
+    description: 'news tags color',
     required: false,
   })
   @IsString()

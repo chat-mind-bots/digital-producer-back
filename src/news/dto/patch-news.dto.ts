@@ -22,7 +22,7 @@ export class PatchNewsDto {
 
   @ApiProperty({
     example: UserRoleEnum.USER,
-    description: 'User role who can see type',
+    description: 'User role who can see news',
     required: false,
     enum: UserRoleEnum,
     examples: [UserRoleEnum.USER, UserRoleEnum.PRODUCER],
@@ -42,7 +42,7 @@ export class PatchNewsDto {
 
   @ApiProperty({
     example: '111',
-    description: 'Time reade of type in ms',
+    description: 'Time reade of news in ms',
     required: false,
   })
   @IsNumber()
