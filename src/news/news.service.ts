@@ -121,7 +121,12 @@ export class NewsService {
       .limit(limit)
       .skip(offset)
       .populate('tags');
-    return news;
+
+    const total = await this.newsModel.countDocuments({ ...filters }).exec();
+    return {
+      data: news,
+      total,
+    };
   }
 
   async createNews(dto: CreateNewsDto) {
