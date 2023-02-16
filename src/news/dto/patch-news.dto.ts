@@ -3,6 +3,7 @@ import {
   IsArray,
   IsEnum,
   IsNumber,
+  IsOptional,
   IsString,
   IsUrl,
   ValidateNested,
@@ -18,6 +19,7 @@ export class PatchNewsDto {
     required: false,
   })
   @IsString()
+  @IsOptional()
   readonly name?: string;
 
   @ApiProperty({
@@ -30,6 +32,7 @@ export class PatchNewsDto {
   })
   @IsString()
   @IsEnum(UserRoleEnum)
+  @IsOptional()
   readonly role?: UserRoleEnum;
 
   @ApiProperty({
@@ -38,6 +41,7 @@ export class PatchNewsDto {
     required: false,
   })
   @IsString()
+  @IsOptional()
   readonly description?: string;
 
   @ApiProperty({
@@ -46,6 +50,7 @@ export class PatchNewsDto {
     required: false,
   })
   @IsNumber()
+  @IsOptional()
   readonly time_read?: number;
 
   @ApiProperty({
@@ -54,6 +59,7 @@ export class PatchNewsDto {
     required: false,
   })
   @IsString()
+  @IsOptional()
   readonly category_id?: string;
 
   @ApiProperty({
@@ -62,6 +68,7 @@ export class PatchNewsDto {
     required: false,
   })
   @IsUrl()
+  @IsOptional()
   readonly image?: string;
 
   @ApiProperty({
@@ -69,6 +76,7 @@ export class PatchNewsDto {
     type: () => [CreateTagDto],
   })
   @IsArray()
+  @IsOptional()
   // @Type(() => CreateTagDto)
   @Type(() => CreateTagDto)
   @ValidateNested({ each: true })

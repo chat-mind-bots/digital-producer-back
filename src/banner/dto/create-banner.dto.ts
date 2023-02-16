@@ -3,6 +3,7 @@ import { BannerTypeEnum } from 'src/banner/enums/banner-type.enum';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsString,
   IsUrl,
@@ -78,12 +79,12 @@ export class CreateBannerDto {
   readonly description: string;
 
   @ApiProperty({
-    example: 'https://www.google.com',
-    description: 'Url to another source',
+    example: true,
+    description: 'is third  party source link?',
     required: false,
   })
-  @IsUrl()
-  readonly is_third_party_source: string;
+  @IsBoolean()
+  readonly is_third_party_source: boolean;
 
   @ApiProperty({
     example: UserRoleEnum.USER,
