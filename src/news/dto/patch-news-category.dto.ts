@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 export class PatchNewsCategoryDto {
@@ -9,6 +9,7 @@ export class PatchNewsCategoryDto {
     required: false,
   })
   @IsString()
+  @IsOptional()
   readonly title?: string;
 
   @ApiProperty({
@@ -21,6 +22,7 @@ export class PatchNewsCategoryDto {
   })
   @IsString()
   @IsEnum(UserRoleEnum)
+  @IsOptional()
   readonly role?: UserRoleEnum;
 
   @ApiProperty({
@@ -29,5 +31,6 @@ export class PatchNewsCategoryDto {
     required: false,
   })
   @IsString()
+  @IsOptional()
   readonly tags_color?: string;
 }

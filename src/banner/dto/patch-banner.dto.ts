@@ -3,6 +3,7 @@ import { BannerTypeEnum } from 'src/banner/enums/banner-type.enum';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsOptional,
   IsString,
@@ -54,8 +55,9 @@ export class PatchBannerDto {
     description: 'Url to another source',
     required: false,
   })
-  @IsUrl()
-  readonly is_third_party_source?: string;
+  @IsBoolean()
+  @IsOptional()
+  readonly is_third_party_source: boolean;
 
   @ApiProperty({
     example: 'Go to page',
