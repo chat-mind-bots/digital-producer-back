@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UsePipes,
 } from '@nestjs/common';
@@ -12,12 +13,17 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 import { CreateCourseCategoryDto } from 'src/course/dto/create-course-category.dto';
-import { CourseCategory, CourseSubCategory } from 'src/course/course.schema';
+import {
+  CourseCategory,
+  CourseSubCategory,
+} from 'src/course/schemas/course-category.schema';
 import { Public } from 'src/auth/public-route.decorator';
 import { MongoIdPipe } from 'src/pipes/mongo-id.pipe';
 import { RequestCourseCategoriesArrayType } from 'src/course/type/request-course-categories-array.type';
 import { CreateCourseSubCategoryDto } from 'src/course/dto/create-course-sub-category.dto';
 import { RequestCourseSubCategoriesArrayType } from 'src/course/type/request-course-sub-categories-array.type';
+import { ChangeCourseCategoryDto } from 'src/course/dto/change-course-category.dto';
+import { ChangeCourseSubCategoryDto } from 'src/course/dto/change-course-sub-category.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -29,6 +35,18 @@ export class CourseController {
   @Post('category')
   async createCourseCategory(@Body() dto: CreateCourseCategoryDto) {
     return this.courseService.createCategory(dto);
+  }
+
+  @ApiOperation({ summary: 'Change course Category' })
+  @ApiResponse({ status: 200, type: CourseCategory })
+  @Roles(UserRoleEnum.ADMIN)
+  @UsePipes(MongoIdPipe)
+  @Patch('category/:id')
+  async changeCourseCategory(
+    @Param('id') id: string,
+    @Body() dto: ChangeCourseCategoryDto,
+  ) {
+    return this.courseService.changeCategory(id, dto);
   }
 
   @ApiOperation({ summary: 'Get course Category by id' })
@@ -57,21 +75,23 @@ export class CourseController {
     return this.courseService.removeCategory(id);
   }
 
-  // @ApiOperation({ summary: 'Change course categories' })
-  // @ApiResponse({ status: 200, type: CourseCategory })
-  // @UsePipes(MongoIdPipe)
-  // @Roles(UserRoleEnum.ADMIN)
-  // @Delete('category/:id')
-  // async changeCourseCategories(@Param('id') id: string) {
-  //   return this.courseService.(id);
-  // }
-
   @ApiOperation({ summary: 'Create course SubCategory' })
   @ApiResponse({ status: 201, type: CourseSubCategory })
   @Roles(UserRoleEnum.ADMIN)
   @Post('sub-category')
   async createCourseSubCategory(@Body() dto: CreateCourseSubCategoryDto) {
     return this.courseService.createSubCategory(dto);
+  }
+  @ApiOperation({ summary: 'Change course SubCategory' })
+  @ApiResponse({ status: 200, type: CourseSubCategory })
+  @Roles(UserRoleEnum.ADMIN)
+  @UsePipes(MongoIdPipe)
+  @Patch('sub-category/:id')
+  async changeCourseSubCategory(
+    @Param('id') id: string,
+    @Body() dto: ChangeCourseSubCategoryDto,
+  ) {
+    return this.courseService.changeSubCategory(id, dto);
   }
 
   @ApiOperation({ summary: 'Get course SubCategory by id' })

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { CourseSubCategory } from 'src/course/course.schema';
+import { CourseSubCategory } from 'src/course/schemas/course-category.schema';
 
 export class RequestCourseSubCategoriesArrayType {
   @ApiProperty({
