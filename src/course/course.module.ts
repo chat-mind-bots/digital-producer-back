@@ -7,7 +7,7 @@ import {
   CourseCategorySchema,
   CourseSubCategory,
   CourseSubCategorySchema,
-} from 'src/course/course.schema';
+} from 'src/course/schemas/course-category.schema';
 
 @Module({
   imports: [

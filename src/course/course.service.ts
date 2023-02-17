@@ -5,10 +5,12 @@ import {
   CourseCategoryDocument,
   CourseSubCategory,
   CourseSubCategoryDocument,
-} from 'src/course/course.schema';
+} from 'src/course/schemas/course-category.schema';
 import { Model } from 'mongoose';
 import { CreateCourseCategoryDto } from 'src/course/dto/create-course-category.dto';
 import { CreateCourseSubCategoryDto } from 'src/course/dto/create-course-sub-category.dto';
+import { ChangeCourseCategoryDto } from 'src/course/dto/change-course-category.dto';
+import { ChangeCourseSubCategoryDto } from 'src/course/dto/change-course-sub-category.dto';
 
 @Injectable()
 export class CourseService {
@@ -18,6 +20,17 @@ export class CourseService {
     @InjectModel(CourseSubCategory.name)
     private readonly courseSubCategoryModel: Model<CourseSubCategoryDocument>,
   ) {}
+
+  async getCategoryByIdWithOutSubCategories(id: string) {
+    const category = await this.courseCategoryModel.findById(id);
+    if (!category) {
+      throw new HttpException(
+        'Document (Course Category) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return category;
+  }
 
   async getCategoryById(id: string) {
     const category = await this.courseCategoryModel.findById(id);
@@ -35,6 +48,12 @@ export class CourseService {
 
   async createCategory(dto: CreateCourseCategoryDto) {
     const category = await this.courseCategoryModel.create({ ...dto });
+    return this.getCategoryById(category._id);
+  }
+
+  async changeCategory(id: string, dto: ChangeCourseCategoryDto) {
+    const category = await this.getCategoryByIdWithOutSubCategories(id);
+    await category.updateOne({ ...dto });
     return this.getCategoryById(category._id);
   }
 
@@ -90,6 +109,20 @@ export class CourseService {
       ...otherDto,
       category: category._id,
     });
+    return this.getSubCategoryById(subCategory._id);
+  }
+
+  async changeSubCategory(id: string, dto: ChangeCourseSubCategoryDto) {
+    const { category_id, ...otherDto } = dto;
+    const category = category_id
+      ? await this.getCategoryById(category_id)
+      : undefined;
+    const update = category_id
+      ? { ...otherDto, category: category._id }
+      : { ...otherDto };
+    const subCategory = await this.courseSubCategoryModel
+      .findByIdAndUpdate(id, update)
+      .lean();
     return this.getSubCategoryById(subCategory._id);
   }
 

@@ -88,7 +88,7 @@ export class NewsController {
   }
 
   @ApiOperation({ summary: 'Get news by id' })
-  @ApiResponse({ status: 200, type: RequestNewsArrayType })
+  @ApiResponse({ status: 200, type: News })
   @Public()
   @UsePipes(MongoIdPipe)
   @Get(':id')
@@ -97,7 +97,7 @@ export class NewsController {
   }
 
   @ApiOperation({ summary: 'Get news' })
-  @ApiResponse({ status: 200, type: News })
+  @ApiResponse({ status: 200, type: RequestNewsArrayType })
   @Public()
   @Get()
   async getAllNews(@Query() query: NewsListGetQueryDto) {
