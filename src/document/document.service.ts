@@ -24,6 +24,18 @@ export class DocumentService {
     private readonly authService: AuthService,
   ) {}
 
+  async getDocumentByIdWithToken(id: string, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+    const document = await this.getDocumentById(id);
+    if (String(_id) !== String(document.owner)) {
+      throw new HttpException(
+        `You not owner of this document`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return document;
+  }
   async getDocumentById(id: string) {
     const document = await this.documentsModel.findById(id);
     if (!document) {
@@ -46,20 +58,26 @@ export class DocumentService {
   }
 
   async changeDocument(id: string, dto: ChangeDocumentDto, token: string) {
-    const { _id } = await this.authService.getUserInfo(token);
-    const document = await this.getDocumentById(id);
-    if (String(_id) !== String(document.owner)) {
-      throw new HttpException(
-        `You not owner of this document`,
-        HttpStatus.FORBIDDEN,
-      );
-    }
+    const document = await this.getDocumentByIdWithToken(id, token);
+
     await document.updateOne({ ...dto });
     return this.getDocumentById(document._id);
   }
 
-  async deleteDocument(id: string) {
+  async deleteDocument(id: string, token: string) {
+    await this.getDocumentByIdWithToken(id, token);
+
     const result = await this.documentsModel.findByIdAndDelete(id);
+    return result;
+  }
+
+  async deleteDocumentWithOutToken(id: string) {
+    const result = await this.documentsModel.findByIdAndDelete(id);
+    return result;
+  }
+
+  async deleteManyDocumentsWithOutToken(ids: string[]) {
+    const result = await this.documentsModel.deleteMany({ _id: { $in: ids } });
     return result;
   }
 }
