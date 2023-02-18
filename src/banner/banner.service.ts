@@ -91,6 +91,9 @@ export class BannerService {
 
   async deleteBanner(id: string) {
     const result = await this.bannerModel.findByIdAndDelete(id);
+    if (!result) {
+      throw new HttpException('Document not found', HttpStatus.NOT_FOUND);
+    }
     return result;
   }
 }

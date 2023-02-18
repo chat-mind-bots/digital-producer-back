@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
@@ -8,13 +8,15 @@ import { ConfigModule } from '@nestjs/config';
 import { jwtConstants } from './constants';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
+import { DocumentModule } from 'src/document/document.module';
 
 @Module({
   imports: [
     ConfigModule,
-    UserModule,
+    forwardRef(() => UserModule),
     PassportModule,
     JwtModule.registerAsync(jwtConstants),
+    forwardRef(() => DocumentModule),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
