@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -59,8 +60,10 @@ export class DocumentController {
   @ApiResponse({ status: 200, type: Documents })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Get(':id')
-  async deleteDocument(@Param('id') id: string) {
-    return this.documentService.deleteDocument(id);
+  @Delete(':id')
+  async deleteDocument(@Req() req, @Param('id') id: string) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.documentService.deleteDocument(id, token);
   }
 }
