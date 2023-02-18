@@ -10,7 +10,7 @@ export class ChangeCourseLessonDto {
   })
   @IsOptional()
   @IsString()
-  readonly name: string;
+  readonly name?: string;
 
   @ApiProperty({
     example: 'Lesson description',
@@ -19,7 +19,7 @@ export class ChangeCourseLessonDto {
   })
   @IsOptional()
   @IsString()
-  readonly description: string;
+  readonly description?: string;
 
   @ApiProperty({
     example: 'https://www.goohle.com',
@@ -28,7 +28,7 @@ export class ChangeCourseLessonDto {
   })
   @IsOptional()
   @IsUrl()
-  readonly image: string;
+  readonly image?: string;
 
   @ApiProperty({
     example: 'https://www.goohle.com',
@@ -37,7 +37,7 @@ export class ChangeCourseLessonDto {
   })
   @IsOptional()
   @IsUrl()
-  readonly video: string;
+  readonly video?: string;
 
   @ApiProperty({
     example: +CourseLevelDifficultlyEnum.MEDIUM,
@@ -49,7 +49,7 @@ export class ChangeCourseLessonDto {
   @IsOptional()
   @IsNumber()
   @IsEnum(CourseLevelDifficultlyEnum)
-  readonly level_difficulty: number;
+  readonly level_difficulty?: number;
 
   @ApiProperty({
     example: 1,
@@ -58,5 +58,5 @@ export class ChangeCourseLessonDto {
   })
   @IsOptional()
   @IsNumber()
-  readonly logic_number: number;
+  readonly logic_number?: number;
 }

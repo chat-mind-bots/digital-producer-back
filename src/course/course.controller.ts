@@ -30,6 +30,10 @@ import { CourseLesson } from 'src/course/schemas/course-lesson.schema';
 import { CreateCourseLessonDto } from 'src/course/dto/lesson/create-course-lesson.dto';
 import { ChangeCourseLessonDto } from 'src/course/dto/lesson/change-course-lesson.dto';
 import { AddDocumentToCourseLessonQueryDto } from 'src/course/dto/query/add-document-to-course-lesson-query.dto';
+import { CourseModule } from 'src/course/schemas/course-module.schema';
+import { CreateCourseModuleDto } from 'src/course/dto/module/create-course-module.dto';
+import { ChangeCourseModuleDto } from 'src/course/dto/module/change-course-module.dto';
+import { AddLessonToCourseModuleQueryDto } from 'src/course/dto/query/add-lesson-to-course-module-query.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -212,6 +216,87 @@ export class CourseController {
     return this.courseService.removeDocumentFromLesson(
       id,
       query['document-id'],
+      token,
+    );
+  }
+
+  // Module
+
+  @ApiOperation({ summary: 'Create course module' })
+  @ApiResponse({ status: 201, type: CourseModule })
+  @Roles(UserRoleEnum.PRODUCER)
+  @Post('module')
+  async createCourseModule(@Req() req, @Body() dto: CreateCourseModuleDto) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.createModule(dto, token);
+  }
+
+  @ApiOperation({ summary: 'Get course module' })
+  @ApiResponse({ status: 200, type: CourseModule })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Get('module/:id')
+  async getCourseModule(@Param('id') id: string) {
+    return this.courseService.getModuleById(id);
+  }
+
+  @ApiOperation({ summary: 'Change course module' })
+  @ApiResponse({ status: 200, type: CourseModule })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Patch('module/:id')
+  async changeCourseModule(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() dto: ChangeCourseModuleDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.changeModule(id, dto, token);
+  }
+
+  @ApiOperation({ summary: 'Delete course module' })
+  @ApiResponse({ status: 200, type: CourseModule })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Delete('module/:id')
+  async removeCourseModule(@Req() req, @Param('id') id: string) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.removeModule(id, token);
+  }
+
+  @ApiOperation({ summary: 'Add lesson to course module' })
+  @ApiResponse({ status: 200, type: CourseModule })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Patch('module/:id/add-lesson')
+  async addLessonToCourseModule(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: AddLessonToCourseModuleQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.addLessonToModule(id, query['lesson-id'], token);
+  }
+
+  @ApiOperation({ summary: 'Remove lesson from course module' })
+  @ApiResponse({ status: 200, type: CourseModule })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Delete('module/:id/remove-lesson')
+  async removeLessonFromCourseModule(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: AddLessonToCourseModuleQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.removeLessonFromModule(
+      id,
+      query['lesson-id'],
       token,
     );
   }
