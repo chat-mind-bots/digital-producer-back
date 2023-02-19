@@ -588,6 +588,8 @@ export class CourseService {
 
     const courses = await this.courseModel
       .find({ ...filter })
+      .limit(query.limit)
+      .skip(query.offset)
       .sort({ ...sort })
       .select('_id name description level_difficulty image is_free tags')
       .populate('tags')
