@@ -19,6 +19,7 @@ import {
 } from 'src/course/schemas/course.schema';
 import { CreateTagDto } from 'src/tags/dto/create-tag.dto';
 import { Type } from 'class-transformer';
+import { IsValidId } from 'src/common/validators/query-object-id-validator.decorator';
 
 export class CreateCourseDto {
   @ApiProperty({
@@ -102,6 +103,15 @@ export class CreateCourseDto {
   @Type(() => CreateTagDto)
   @ValidateNested({ each: true })
   readonly tags!: CreateTagDto[];
+
+  @ApiProperty({
+    example: '83fff..',
+    description: 'Sub-category course',
+    required: true,
+  })
+  @IsString()
+  @IsValidId()
+  readonly sub_category: string;
 
   @ApiProperty({
     example: [
