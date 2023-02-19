@@ -18,6 +18,8 @@ import {
 } from 'src/course/schemas/course-module.schema';
 import { DocumentModule } from 'src/document/document.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { Course, CourseSchema } from 'src/course/schemas/course.schema';
+import { TagsModule } from 'src/tags/tags.module';
 
 @Module({
   imports: [
@@ -26,9 +28,11 @@ import { AuthModule } from 'src/auth/auth.module';
       { name: CourseSubCategory.name, schema: CourseSubCategorySchema },
       { name: CourseLesson.name, schema: CourseLessonSchema },
       { name: CourseModuleModel.name, schema: CourseModuleSchema },
+      { name: Course.name, schema: CourseSchema },
     ]),
     forwardRef(() => DocumentModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => TagsModule),
   ],
   providers: [CourseService],
   controllers: [CourseController],

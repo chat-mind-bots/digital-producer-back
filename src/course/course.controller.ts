@@ -34,6 +34,9 @@ import { CourseModule } from 'src/course/schemas/course-module.schema';
 import { CreateCourseModuleDto } from 'src/course/dto/module/create-course-module.dto';
 import { ChangeCourseModuleDto } from 'src/course/dto/module/change-course-module.dto';
 import { AddLessonToCourseModuleQueryDto } from 'src/course/dto/query/add-lesson-to-course-module-query.dto';
+import { Course } from 'src/course/schemas/course.schema';
+import { CreateCourseDto } from 'src/course/dto/course/create-course.dto';
+import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -234,7 +237,7 @@ export class CourseController {
 
   @ApiOperation({ summary: 'Get course module' })
   @ApiResponse({ status: 200, type: CourseModule })
-  @Roles(UserRoleEnum.PRODUCER)
+  @Roles(UserRoleEnum.USER)
   @UsePipes(MongoIdPipe)
   @Get('module/:id')
   async getCourseModule(@Param('id') id: string) {
@@ -299,5 +302,52 @@ export class CourseController {
       query['lesson-id'],
       token,
     );
+  }
+
+  // Courses
+
+  @ApiOperation({ summary: 'Create course' })
+  @ApiResponse({ status: 201, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @Post()
+  async createCourse(@Req() req, @Body() dto: CreateCourseDto) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.createCourse(dto, token);
+  }
+
+  @ApiOperation({ summary: 'Get course' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.USER)
+  @UsePipes(MongoIdPipe)
+  @Get(':id')
+  async getCourse(@Param('id') id: string) {
+    return this.courseService.getCourseById(id);
+  }
+
+  @ApiOperation({ summary: 'Change course' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Patch(':id')
+  async changeCourse(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() dto: ChangeCourseDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.changeCourse(id, dto, token);
+  }
+
+  @ApiOperation({ summary: 'Delete course' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Delete(':id')
+  async removeCourse(@Req() req, @Param('id') id: string) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.removeCourse(id, token);
   }
 }

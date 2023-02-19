@@ -31,6 +31,10 @@ import { DocumentService } from 'src/document/document.service';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateCourseModuleDto } from 'src/course/dto/module/create-course-module.dto';
 import { ChangeCourseModuleDto } from 'src/course/dto/module/change-course-module.dto';
+import { Course, CourseDocument } from 'src/course/schemas/course.schema';
+import { CreateCourseDto } from 'src/course/dto/course/create-course.dto';
+import { TagsService } from 'src/tags/tags.service';
+import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
 
 @Injectable()
 export class CourseService {
@@ -43,10 +47,14 @@ export class CourseService {
     private readonly courseLessonModel: Model<CourseLessonDocument>,
     @InjectModel(CourseModule.name)
     private readonly courseModuleModel: Model<CourseModuleDocument>,
+    @InjectModel(Course.name)
+    private readonly courseModel: Model<CourseDocument>,
     @Inject(forwardRef(() => DocumentService))
     private readonly documentService: DocumentService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => TagsService))
+    private readonly tagsService: TagsService,
   ) {}
 
   // CATEGORIES
@@ -393,5 +401,90 @@ export class CourseService {
     await this.removeLessonWithOutToken(lessonId);
 
     return this.getModuleById(id);
+  }
+
+  // COURSES
+
+  async getCourseById(id: string) {
+    const course = await this.courseModel
+      .findById(id)
+      .populate({
+        path: 'owner',
+        select: '_id first_name',
+      })
+      .populate({
+        path: 'modules',
+        populate: {
+          path: 'lessons',
+          select: '_id name image level_difficulty logic_number',
+        },
+      })
+      .populate('tags');
+
+    if (!module) {
+      throw new HttpException(
+        'Document (Course) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return course;
+  }
+
+  async getCourseByIdWithTokenCheck(id: string, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+    const course = await this.getCourseById(id);
+
+    if (String(_id) !== String(course.owner._id)) {
+      throw new HttpException(
+        `You not owner of this module`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return course;
+  }
+
+  async createCourse(dto: CreateCourseDto, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+    const { tags: tagsDto, ...otherDto } = dto;
+
+    const tagsFromDB = await this.tagsService.createManyTags(tagsDto);
+    const tags = [];
+    for (const tag of tagsFromDB) {
+      tags.push(tag._id);
+    }
+
+    const course = await this.courseModel.create({
+      ...otherDto,
+      owner: _id,
+      tags,
+    });
+    return this.getCourseById(course._id);
+  }
+
+  async changeCourse(id: string, dto: ChangeCourseDto, token: string) {
+    const course = await this.getCourseByIdWithTokenCheck(id, token);
+
+    const { tags: tagsDto, ...otherDto } = dto;
+
+    if (tagsDto) {
+      const tagsFromDB = await this.tagsService.createManyTags(tagsDto);
+      const tags = [];
+      for (const tag of tagsFromDB) {
+        tags.push(tag._id);
+      }
+      await course.updateOne({ ...otherDto, tags });
+    } else {
+      await course.updateOne(otherDto);
+    }
+
+    return this.getCourseById(id);
+  }
+
+  async removeCourse(id: string, token: string) {
+    await this.getCourseByIdWithTokenCheck(id, token);
+
+    const result = this.courseLessonModel.findByIdAndDelete(id);
+    return result;
   }
 }
