@@ -12,7 +12,7 @@ import {
   CourseSubCategory,
   CourseSubCategoryDocument,
 } from 'src/course/schemas/course-category.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateCourseCategoryDto } from 'src/course/dto/category/create-course-category.dto';
 import { CreateCourseSubCategoryDto } from 'src/course/dto/sub-category/create-course-sub-category.dto';
 import { ChangeCourseCategoryDto } from 'src/course/dto/category/change-course-category.dto';
@@ -35,6 +35,8 @@ import { Course, CourseDocument } from 'src/course/schemas/course.schema';
 import { CreateCourseDto } from 'src/course/dto/course/create-course.dto';
 import { TagsService } from 'src/tags/tags.service';
 import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
+import { RequestCourseArrayType } from 'src/course/type/request-course-array.type';
+import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 
 @Injectable()
 export class CourseService {
@@ -258,18 +260,6 @@ export class CourseService {
     return result;
   }
 
-  async removeWithOutToken(id: string) {
-    const lesson = await this.getLessonById(id);
-
-    const { documents } = lesson;
-    await this.documentService.deleteManyDocumentsWithOutToken(
-      documents.map((doc) => String(doc)),
-    );
-
-    const result = await lesson.remove();
-    return result;
-  }
-
   async addDocumentToLesson(id: string, documentId: string, token: string) {
     const lesson = await this.getLessonByIdWithTokenCheck(id, token);
 
@@ -297,7 +287,7 @@ export class CourseService {
       !lesson.documents.some(({ _id }) => String(_id) === String(documentId))
     ) {
       throw new HttpException(
-        `This lesson does not belong to the selected module`,
+        `This document does not belong to the selected document`,
         HttpStatus.NOT_FOUND,
       );
     }
@@ -363,10 +353,10 @@ export class CourseService {
     const { lessons } = await this.getModuleByIdWithTokenCheck(id, token);
 
     for (const lesson of lessons) {
-      await this.removeWithOutToken(String(lesson._id));
+      await this.removeLessonWithOutToken(String(lesson._id));
     }
 
-    const result = this.courseLessonModel.findByIdAndDelete(id);
+    const result = this.courseModuleModel.findByIdAndDelete(id);
     return result;
   }
 
@@ -419,9 +409,10 @@ export class CourseService {
           select: '_id name image level_difficulty logic_number',
         },
       })
-      .populate('tags');
+      .populate('tags')
+      .populate('documents');
 
-    if (!module) {
+    if (!course) {
       throw new HttpException(
         'Document (Course) not found',
         HttpStatus.NOT_FOUND,
@@ -446,8 +437,9 @@ export class CourseService {
 
   async createCourse(dto: CreateCourseDto, token: string) {
     const { _id } = await this.authService.getUserInfo(token);
-    const { tags: tagsDto, ...otherDto } = dto;
+    const { tags: tagsDto, sub_category, ...otherDto } = dto;
 
+    const { _id: subCategoryId } = await this.getSubCategoryById(sub_category);
     const tagsFromDB = await this.tagsService.createManyTags(tagsDto);
     const tags = [];
     for (const tag of tagsFromDB) {
@@ -457,6 +449,7 @@ export class CourseService {
     const course = await this.courseModel.create({
       ...otherDto,
       owner: _id,
+      sub_category: subCategoryId,
       tags,
     });
     return this.getCourseById(course._id);
@@ -482,9 +475,127 @@ export class CourseService {
   }
 
   async removeCourse(id: string, token: string) {
-    await this.getCourseByIdWithTokenCheck(id, token);
+    const { documents, modules } = await this.getCourseByIdWithTokenCheck(
+      id,
+      token,
+    );
 
-    const result = this.courseLessonModel.findByIdAndDelete(id);
+    await this.documentService.deleteManyDocumentsWithOutToken(
+      documents.map(({ _id }) => String(_id)),
+    );
+
+    for (const { _id } of modules) {
+      await this.removeModule(String(_id), token);
+    }
+
+    const result = this.courseModel.findByIdAndDelete(id);
     return result;
+  }
+
+  async addDocumentToCourse(id: string, documentId: string, token: string) {
+    const course = await this.getCourseByIdWithTokenCheck(id, token);
+
+    if (
+      course.documents.some(({ _id }) => String(_id) === String(documentId))
+    ) {
+      throw new HttpException(
+        `This document has already been assigned to a course before`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const document = await this.documentService.getDocumentById(documentId);
+    await course.updateOne({ documents: [...course.documents, document._id] });
+    return this.getCourseById(id);
+  }
+
+  async removeDocumentFromCourse(
+    id: string,
+    documentId: string,
+    token: string,
+  ) {
+    const course = await this.getCourseByIdWithTokenCheck(id, token);
+
+    if (
+      !course.documents.some(({ _id }) => String(_id) === String(documentId))
+    ) {
+      throw new HttpException(
+        `This course does not belong to the selected document`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const update = { $pull: { documents: documentId } };
+    const result = await course.updateOne(update).exec();
+
+    await this.documentService.deleteDocumentWithOutToken(documentId);
+    return this.getCourseById(id);
+  }
+
+  async addModuleToCourse(id: string, moduleId: string, token: string) {
+    const course = await this.getCourseByIdWithTokenCheck(id, token);
+
+    if (course.modules.some(({ _id }) => String(_id) === String(moduleId))) {
+      throw new HttpException(
+        `This module has already been assigned to a course before`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const module = await this.getModuleByIdWithTokenCheck(moduleId, token);
+
+    await course.updateOne({ modules: [...course.modules, module._id] });
+    return this.getCourseById(id);
+  }
+
+  async removeModuleFromCourse(id: string, moduleId: string, token: string) {
+    const course = await this.getCourseByIdWithTokenCheck(id, token);
+
+    if (!course.modules.some(({ _id }) => String(_id) === String(moduleId))) {
+      throw new HttpException(
+        `This course does not belong to the selected module`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const update = { $pull: { modules: moduleId } };
+    await course.updateOne(update).exec();
+
+    await this.removeModule(moduleId, token);
+    return this.getCourseById(id);
+  }
+
+  async getCourses(query: GetCoursesQueryDto): Promise<RequestCourseArrayType> {
+    const filter = {};
+    const sort = {};
+    if (query['sub-category-id']) {
+      const subCategoriesIdsArray = Array.isArray(query['sub-category-id'])
+        ? query['sub-category-id']
+        : [query['sub-category-id']];
+      filter['sub_category'] = {
+        $in: subCategoriesIdsArray.map(
+          (subCatId) => new Types.ObjectId(subCatId),
+        ),
+      };
+    }
+    if (query['owner-id']) {
+      const ownerIdsArray = Array.isArray(query['owner-id'])
+        ? query['owner-id']
+        : [query['owner-id']];
+
+      filter['owner'] = {
+        $in: ownerIdsArray.map((ownerId) => new Types.ObjectId(ownerId)),
+      };
+    }
+
+    const courses = await this.courseModel
+      .find({ ...filter })
+      .sort({ ...sort })
+      .select('_id name description level_difficulty image is_free tags')
+      .populate('tags')
+      .exec();
+    const total = await this.courseModel.countDocuments({ ...filter }).exec();
+    return {
+      data: courses,
+      total,
+    };
   }
 }

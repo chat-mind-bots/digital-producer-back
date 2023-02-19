@@ -37,6 +37,9 @@ import { AddLessonToCourseModuleQueryDto } from 'src/course/dto/query/add-lesson
 import { Course } from 'src/course/schemas/course.schema';
 import { CreateCourseDto } from 'src/course/dto/course/create-course.dto';
 import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
+import { AddModuleToCourseCourseQueryDto } from 'src/course/dto/query/add-module-to-course-course-query.dto';
+import { RequestCourseArrayType } from 'src/course/type/request-course-array.type';
+import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -189,7 +192,7 @@ export class CourseController {
   @ApiResponse({ status: 200, type: CourseLesson })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Patch('lesson/:id/add-document')
+  @Patch('lesson/:id/document')
   async addDocumentToCourseLesson(
     @Req() req,
     @Param('id') id: string,
@@ -204,11 +207,11 @@ export class CourseController {
     );
   }
 
-  @ApiOperation({ summary: 'Remove document to course lesson' })
+  @ApiOperation({ summary: 'Remove document from course lesson' })
   @ApiResponse({ status: 200, type: CourseLesson })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Delete('lesson/:id/add-document')
+  @Delete('lesson/:id/document')
   async removeDocumentFromCourseLesson(
     @Req() req,
     @Param('id') id: string,
@@ -274,7 +277,7 @@ export class CourseController {
   @ApiResponse({ status: 200, type: CourseModule })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Patch('module/:id/add-lesson')
+  @Patch('module/:id/lesson')
   async addLessonToCourseModule(
     @Req() req,
     @Param('id') id: string,
@@ -289,7 +292,7 @@ export class CourseController {
   @ApiResponse({ status: 200, type: CourseModule })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Delete('module/:id/remove-lesson')
+  @Delete('module/:id/lesson')
   async removeLessonFromCourseModule(
     @Req() req,
     @Param('id') id: string,
@@ -349,5 +352,84 @@ export class CourseController {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
     return this.courseService.removeCourse(id, token);
+  }
+
+  @ApiOperation({ summary: 'Add document to course' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Patch(':id/document')
+  async addDocumentToCourse(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: AddDocumentToCourseLessonQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.addDocumentToCourse(
+      id,
+      query['document-id'],
+      token,
+    );
+  }
+
+  @ApiOperation({ summary: 'Remove document from course' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Delete(':id/document')
+  async removeDocumentFromCourse(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: AddDocumentToCourseLessonQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.removeDocumentFromCourse(
+      id,
+      query['document-id'],
+      token,
+    );
+  }
+
+  @ApiOperation({ summary: 'Add module to course module' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Patch(':id/module')
+  async addModuleToCourse(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: AddModuleToCourseCourseQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.addModuleToCourse(id, query['module-id'], token);
+  }
+
+  @ApiOperation({ summary: 'Remove module from course module' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Delete(':id/module')
+  async removeModuleFromCourse(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: AddModuleToCourseCourseQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.removeModuleFromCourse(
+      id,
+      query['module-id'],
+      token,
+    );
+  }
+  @ApiOperation({ summary: 'Get courses' })
+  @ApiResponse({ status: 200, type: RequestCourseArrayType })
+  @Roles(UserRoleEnum.USER)
+  @Get()
+  async getCourses(@Query() query: GetCoursesQueryDto) {
+    return this.courseService.getCourses(query);
   }
 }

@@ -7,6 +7,7 @@ import { User } from 'src/user/user.schema';
 import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 import { Tag } from 'src/tags/tags.schema';
 import { CourseModule } from 'src/course/schemas/course-module.schema';
+import { CourseSubCategory } from 'src/course/schemas/course-category.schema';
 
 export interface ICoursePrice {
   actual: number;
@@ -110,6 +111,10 @@ export class Course {
   @ApiProperty()
   @Prop({ required: true, type: Types.ObjectId, ref: User.name })
   owner: Types.ObjectId;
+
+  @ApiProperty()
+  @Prop({ required: true, type: Types.ObjectId, ref: CourseSubCategory.name })
+  sub_category: Types.ObjectId;
 
   @ApiProperty()
   @Prop({
