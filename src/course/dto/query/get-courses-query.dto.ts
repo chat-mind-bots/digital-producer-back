@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { IsValidId } from 'src/common/validators/query-object-id-validator.decorator';
+import { Transform } from 'class-transformer';
+import { toNumber } from 'src/common/helpers/query.helper';
 
 export class GetCoursesQueryDto {
   @ApiProperty({
@@ -11,8 +13,6 @@ export class GetCoursesQueryDto {
   @IsOptional()
   @IsString({ each: true })
   @IsValidId({ each: true })
-  // @IsString()
-  // @IsValidId()
   readonly 'sub-category-id'?: string[];
 
   @ApiProperty({
@@ -23,7 +23,23 @@ export class GetCoursesQueryDto {
   @IsOptional()
   @IsString({ each: true })
   @IsValidId({ each: true })
-  // @IsString()
-  // @IsValidId()
   readonly 'owner-id'?: string[];
+
+  @ApiProperty({
+    example: 5,
+    description: 'limit',
+    required: true,
+  })
+  @Transform(({ value }) => toNumber(value, { default: 5, min: 1, max: 15 }))
+  @IsNumber()
+  readonly limit: number;
+
+  @ApiProperty({
+    example: 0,
+    description: 'offset',
+    required: true,
+  })
+  @Transform(({ value }) => toNumber(value, { default: 0, min: 0 }))
+  @IsNumber()
+  readonly offset: number;
 }
