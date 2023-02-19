@@ -216,6 +216,7 @@ export class CourseService {
         HttpStatus.FORBIDDEN,
       );
     }
+
     return lesson;
   }
 

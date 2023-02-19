@@ -17,6 +17,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { NewsModule } from './news/news.module';
 import { CourseModule } from './course/course.module';
 import { DocumentModule } from './document/document.module';
+import { TestModule } from './test/test.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { DocumentModule } from './document/document.module';
     NewsModule,
     CourseModule,
     DocumentModule,
+    TestModule,
   ],
   controllers: [AppController],
   providers: [

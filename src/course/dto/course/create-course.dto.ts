@@ -120,7 +120,7 @@ export class CreateCourseDto {
         value: 'Note value',
       },
     ],
-    description: 'user role',
+    description: 'Note for course',
     required: false,
     type: Note,
   })
