@@ -20,6 +20,7 @@ import { DocumentModule } from 'src/document/document.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { Course, CourseSchema } from 'src/course/schemas/course.schema';
 import { TagsModule } from 'src/tags/tags.module';
+import { TestModule } from 'src/test/test.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TagsModule } from 'src/tags/tags.module';
     ]),
     forwardRef(() => DocumentModule),
     forwardRef(() => AuthModule),
+    forwardRef(() => TestModule),
     forwardRef(() => TagsModule),
   ],
   providers: [CourseService],
