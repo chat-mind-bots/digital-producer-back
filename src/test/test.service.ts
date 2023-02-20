@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Test, TestDocument } from 'src/test/test.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateTestDto } from 'src/test/dto/create-test.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { ChangeTestDto } from 'src/test/dto/change-test.dto';
@@ -35,13 +35,26 @@ export class TestService {
     return test;
   }
 
+  async getTestsIdsWithToken(ids: string[], token) {
+    const { _id } = await this.authService.getUserInfo(token);
+    const filter = {
+      _id: {
+        $in: ids.map((id) => new Types.ObjectId(id)),
+      },
+      owner: _id,
+    };
+    return this.testModel
+      .find({ ...filter })
+      .select('_id')
+      .exec();
+  }
   async getTestWithToken(id: string, token: string) {
     const { _id } = await this.authService.getUserInfo(token);
     const test = await this.getTestById(id);
 
     if (String(_id) !== String(test.owner._id)) {
       throw new HttpException(
-        `You not owner of this lesson`,
+        `You not owner of this test`,
         HttpStatus.FORBIDDEN,
       );
     }
