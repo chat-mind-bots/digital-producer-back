@@ -113,6 +113,10 @@ export class Course {
   owner: Types.ObjectId;
 
   @ApiProperty()
+  @Prop({ required: true, type: [Types.ObjectId], ref: User.name, default: [] })
+  students: [Types.ObjectId];
+
+  @ApiProperty()
   @Prop({ required: true, type: Types.ObjectId, ref: CourseSubCategory.name })
   sub_category: Types.ObjectId;
 

@@ -5,12 +5,14 @@ import { User, UserSchema } from 'src/user/user.schema';
 import { BotModule } from 'src/bot/bot.module';
 import { UserController } from 'src/user/user.controller';
 import { DocumentModule } from 'src/document/document.module';
+import { CourseModule } from 'src/course/course.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     forwardRef(() => BotModule),
     forwardRef(() => DocumentModule),
+    forwardRef(() => CourseModule),
   ],
   providers: [UserService],
   exports: [UserService],

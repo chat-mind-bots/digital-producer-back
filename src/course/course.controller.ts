@@ -457,11 +457,23 @@ export class CourseController {
       token,
     );
   }
+
   @ApiOperation({ summary: 'Get courses' })
   @ApiResponse({ status: 200, type: RequestCourseArrayType })
   @Roles(UserRoleEnum.USER)
   @Get()
   async getCourses(@Query() query: GetCoursesQueryDto) {
     return this.courseService.getCourses(query);
+  }
+
+  @ApiOperation({ summary: 'Enroll  on course' })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.USER)
+  @UsePipes(MongoIdPipe)
+  @Post(':id/enroll')
+  async enrollOnCourse(@Req() req, @Param('id') id: string) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.enrollToCourse(id, token);
   }
 }
