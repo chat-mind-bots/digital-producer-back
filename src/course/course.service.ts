@@ -665,4 +665,27 @@ export class CourseService {
       total,
     };
   }
+
+  async enrollToCourse(id: string, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+
+    const course = await this.getCourseById(id);
+
+    if (String(course.owner._id) === String(_id)) {
+      throw new HttpException(
+        `You cannot enroll in a course if you own it`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (course.students.some((id) => String(id) === String(_id))) {
+      throw new HttpException(
+        `You were previously enrolled in the course`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    await course.updateOne({ students: [...course.students, _id] });
+
+    return this.getCourseById(id);
+  }
 }

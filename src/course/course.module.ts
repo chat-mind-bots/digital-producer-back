@@ -21,6 +21,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { Course, CourseSchema } from 'src/course/schemas/course.schema';
 import { TagsModule } from 'src/tags/tags.module';
 import { TestModule } from 'src/test/test.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TestModule } from 'src/test/test.module';
     forwardRef(() => DocumentModule),
     forwardRef(() => AuthModule),
     forwardRef(() => TestModule),
+    forwardRef(() => UserModule),
     forwardRef(() => TagsModule),
   ],
   providers: [CourseService],
