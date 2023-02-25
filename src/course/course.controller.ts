@@ -358,7 +358,7 @@ export class CourseController {
   @UsePipes(MongoIdPipe)
   @Get(':id')
   async getCourse(@Param('id') id: string) {
-    return this.courseService.getCourseById(id);
+    return this.courseService.getCourseWithUpdateId(id);
   }
 
   @ApiOperation({ summary: 'Change course' })

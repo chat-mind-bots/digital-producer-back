@@ -317,7 +317,7 @@ export class CourseService {
     const lesson = await this.getLessonByIdWithTokenCheck(id, token);
 
     const ids = [];
-    console.log(query['test-id']);
+
     if (query['test-id']) {
       const testIdsArray = Array.isArray(query['test-id'])
         ? query['test-id']
@@ -485,6 +485,40 @@ export class CourseService {
       );
     }
     return course;
+  }
+
+  async getCourseWithUpdateId(id: string) {
+    const course = await this.courseModel
+      .findById(id)
+      .populate({
+        path: 'owner',
+        select: '_id first_name',
+      })
+      .populate({
+        path: 'modules',
+        populate: {
+          path: 'lessons',
+          select: '_id name image level_difficulty logic_number',
+        },
+      })
+      .populate('tags')
+      .populate('documents')
+      .populate('sub_category')
+      .lean()
+      .exec();
+
+    if (!course) {
+      throw new HttpException(
+        'Document (Course) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return {
+      ...course,
+      category: (course.sub_category as unknown as CourseSubCategory)?.category,
+      sub_category: course.sub_category?._id,
+    };
   }
 
   async getCourseByIdWithTokenCheck(id: string, token: string) {

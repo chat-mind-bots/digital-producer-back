@@ -35,7 +35,13 @@ export class UserService {
 
   async updateUserRole(id: string, role: UserRoleEnum) {
     const user = await this.findById(id);
-    await user.update({ role: [...user.role, role] });
+    await user.updateOne({ $addToSet: { role: role } });
+    return await this.findById(id);
+  }
+
+  async beatUserRole(id: string, role: UserRoleEnum) {
+    const user = await this.findById(id);
+    await user.updateOne({ $pull: { role: role } });
     return await this.findById(id);
   }
 
