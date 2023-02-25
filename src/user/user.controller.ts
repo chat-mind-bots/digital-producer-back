@@ -31,6 +31,33 @@ export class UserController {
     return this.userService.updateUserRole(id, UserRoleEnum.ADMIN);
   }
 
+  @ApiOperation({ summary: 'Beat user role from super admin  to admin' })
+  @ApiResponse({ status: 200, type: User })
+  @Roles(UserRoleEnum.SUPER_ADMIN)
+  @UsePipes(MongoIdPipe)
+  @Post('/beat-from-super-admin/:id')
+  async beatFromSuperAdmin(@Param('id') id: string) {
+    return this.userService.beatUserRole(id, UserRoleEnum.SUPER_ADMIN);
+  }
+
+  @ApiOperation({ summary: 'Beat user role from producer to user' })
+  @ApiResponse({ status: 200, type: User })
+  @Roles(UserRoleEnum.ADMIN)
+  @UsePipes(MongoIdPipe)
+  @Post('/beat-from-producer/:id')
+  async beatFromProducer(@Param('id') id: string) {
+    return this.userService.beatUserRole(id, UserRoleEnum.PRODUCER);
+  }
+
+  @ApiOperation({ summary: 'Beat user role from admin to producer' })
+  @ApiResponse({ status: 200, type: User })
+  @Roles(UserRoleEnum.SUPER_ADMIN)
+  @UsePipes(MongoIdPipe)
+  @Post('/beat-from-admin/:id')
+  async beatFromAdmin(@Param('id') id: string) {
+    return this.userService.beatUserRole(id, UserRoleEnum.ADMIN);
+  }
+
   @ApiOperation({ summary: 'Update user role to super admin' })
   @ApiResponse({ status: 200, type: User })
   @Roles(UserRoleEnum.SUPER_ADMIN)
