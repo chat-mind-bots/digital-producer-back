@@ -40,6 +40,7 @@ import { RequestCourseArrayType } from 'src/course/type/request-course-array.typ
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { TestService } from 'src/test/test.service';
 import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
+import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 
 @Injectable()
 export class CourseService {
@@ -684,7 +685,51 @@ export class CourseService {
       );
     }
 
-    await course.updateOne({ students: [...course.students, _id] });
+    await course.updateOne({ $addToSet: { students: _id } });
+
+    return this.getCourseById(id);
+  }
+
+  async enrollToCourseAnotherUser(
+    id: string,
+    query: EnrollUserToCourseQueryDto,
+    token: string,
+  ) {
+    const { _id } = await this.authService.getUserInfo(token);
+    const course = await this.getCourseById(id);
+
+    if (String(course.owner._id) === String(_id)) {
+      throw new HttpException(
+        `You can't sign people up for this course because you don't own it`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    const userIdsArray = [];
+
+    if (query['user-id']) {
+      userIdsArray.unshift(
+        Array.isArray(query['user-id']) ? query['user-id'] : [query['user-id']],
+      );
+    }
+
+    userIdsArray.forEach((_id) => {
+      if (String(course.owner._id) === String(_id)) {
+        throw new HttpException(
+          `You cannot enroll in a course if you own it. Problem id is - ${_id}`,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (course.students.some((id) => String(id) === String(_id))) {
+        throw new HttpException(
+          `You were previously enrolled in the course. Problem id is - ${_id}`,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    });
+
+    course.updateOne({
+      $addToSet: { students: userIdsArray.map((id) => new Types.ObjectId(id)) },
+    });
 
     return this.getCourseById(id);
   }
