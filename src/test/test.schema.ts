@@ -40,8 +40,16 @@ export class Test {
   answers: [IAnswer];
 
   @ApiProperty()
-  @Prop({ required: true })
+  @Prop({ required: false, type: String })
   right_answer: string;
+
+  @ApiProperty()
+  @Prop({ required: false, type: [String] })
+  right_answers: string[];
+
+  @ApiProperty()
+  @Prop({ required: true, type: Boolean })
+  is_multiply: boolean;
 
   @ApiProperty()
   @Prop({ required: true, type: Types.ObjectId, ref: User.name })
