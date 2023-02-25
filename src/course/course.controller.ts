@@ -463,8 +463,10 @@ export class CourseController {
   @ApiResponse({ status: 200, type: RequestCourseArrayType })
   @Roles(UserRoleEnum.USER)
   @Get()
-  async getCourses(@Query() query: GetCoursesQueryDto) {
-    return this.courseService.getCourses(query);
+  async getCourses(@Req() req, @Query() query: GetCoursesQueryDto) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.getCourses(query, token);
   }
 
   @ApiOperation({ summary: 'Enroll  on course' })
