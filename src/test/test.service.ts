@@ -62,7 +62,9 @@ export class TestService {
     return test;
   }
   async getTestWithOutRightAnswer(id: string) {
-    const test = await this.testModel.findById(id).select('-right_answer');
+    const test = await this.testModel
+      .findById(id)
+      .select('-right_answer -right_answers');
 
     if (!test) {
       throw new HttpException(

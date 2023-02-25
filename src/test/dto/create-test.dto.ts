@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import { Answer, IAnswer } from 'src/test/test.schema';
 
 export class CreateTestDto {
@@ -37,7 +37,7 @@ export class CreateTestDto {
       },
     ],
     description: 'answers array',
-    required: false,
+    required: true,
     type: Answer,
   })
   @IsArray()
@@ -48,6 +48,24 @@ export class CreateTestDto {
     description: 'Right answer key',
     required: false,
   })
+  @IsOptional()
   @IsString()
-  right_answer: string;
+  right_answer?: string;
+
+  @ApiProperty({
+    example: ['answer_1', 'answer_2'],
+    description: 'Right answers key in  array',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  right_answers?: [string];
+
+  @ApiProperty({
+    example: true,
+    description: 'The question  is multiply?',
+    required: true,
+  })
+  @IsBoolean()
+  is_multiply: boolean;
 }
