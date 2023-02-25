@@ -685,6 +685,15 @@ export class CourseService {
         $in: ownerIdsArray.map((ownerId) => new Types.ObjectId(ownerId)),
       };
     }
+    if (query['enrolled-user-id']) {
+      const ownerIdsArray = Array.isArray(query['enrolled-user-id'])
+        ? query['enrolled-user-id']
+        : [query['enrolled-user-id']];
+
+      filter['students'] = {
+        $in: ownerIdsArray.map((ownerId) => new Types.ObjectId(ownerId)),
+      };
+    }
 
     const courses = await this.courseModel
       .find({ ...filter })

@@ -26,6 +26,16 @@ export class GetCoursesQueryDto {
   readonly 'owner-id'?: string[];
 
   @ApiProperty({
+    example: ['83f...', 'c32...', '9a7...'],
+    description: 'Array of enrolled user ids',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ each: true })
+  @IsValidId({ each: true })
+  readonly 'enrolled-user-id'?: string[];
+
+  @ApiProperty({
     example: 5,
     description: 'limit',
     required: true,
