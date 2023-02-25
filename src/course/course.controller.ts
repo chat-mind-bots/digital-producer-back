@@ -42,6 +42,7 @@ import { RequestCourseArrayType } from 'src/course/type/request-course-array.typ
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
 import { RemoveTestFromCourseLessonQueryDto } from 'src/course/dto/query/remove-test-from-course-lesson-query.dto';
+import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -475,5 +476,22 @@ export class CourseController {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
     return this.courseService.enrollToCourse(id, token);
+  }
+
+  @ApiOperation({
+    summary: 'Enroll  another user on course (method for owner)',
+  })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Post(':id/enroll-another-user')
+  async enrollOnCourseAnotherUser(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: EnrollUserToCourseQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.enrollToCourseAnotherUser(id, query, token);
   }
 }
