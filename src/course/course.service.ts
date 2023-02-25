@@ -698,7 +698,7 @@ export class CourseService {
     const { _id } = await this.authService.getUserInfo(token);
     const course = await this.getCourseById(id);
 
-    if (String(course.owner._id) === String(_id)) {
+    if (String(course.owner._id) !== String(_id)) {
       throw new HttpException(
         `You can't sign people up for this course because you don't own it`,
         HttpStatus.FORBIDDEN,
@@ -707,8 +707,10 @@ export class CourseService {
     const userIdsArray = [];
 
     if (query['user-id']) {
-      userIdsArray.unshift(
-        Array.isArray(query['user-id']) ? query['user-id'] : [query['user-id']],
+      userIdsArray.push(
+        ...(Array.isArray(query['user-id'])
+          ? query['user-id']
+          : [query['user-id']]),
       );
     }
 
@@ -727,7 +729,7 @@ export class CourseService {
       }
     });
 
-    course.updateOne({
+    await course.updateOne({
       $addToSet: { students: userIdsArray.map((id) => new Types.ObjectId(id)) },
     });
 
