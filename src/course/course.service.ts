@@ -487,7 +487,7 @@ export class CourseService {
     return course;
   }
 
-  async getCourseWithUpdateId(id: string) {
+  async getCourseWithUpdateId(id: string, token: string) {
     const course = await this.courseModel
       .findById(id)
       .populate({
@@ -514,8 +514,13 @@ export class CourseService {
       );
     }
 
+    const { _id } = await this.authService.getUserInfo(token);
+
     return {
-      ...course,
+      ...omit(course, ['students']),
+      is_enrolled: !!course.students?.some(
+        (st_id) => String(st_id) === String(_id),
+      ),
       category: (course.sub_category as unknown as CourseSubCategory)?.category,
       sub_category: course.sub_category?._id,
     };
