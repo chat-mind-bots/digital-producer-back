@@ -13,6 +13,7 @@ import {
   CourseSubCategory,
   CourseSubCategoryDocument,
 } from 'src/course/schemas/course-category.schema';
+import { omit } from 'lodash';
 import { Model, Types } from 'mongoose';
 import { CreateCourseCategoryDto } from 'src/course/dto/category/create-course-category.dto';
 import { CreateCourseSubCategoryDto } from 'src/course/dto/sub-category/create-course-sub-category.dto';
@@ -36,7 +37,6 @@ import { Course, CourseDocument } from 'src/course/schemas/course.schema';
 import { CreateCourseDto } from 'src/course/dto/course/create-course.dto';
 import { TagsService } from 'src/tags/tags.service';
 import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
-import { RequestCourseArrayType } from 'src/course/type/request-course-array.type';
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { TestService } from 'src/test/test.service';
 import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
@@ -487,7 +487,7 @@ export class CourseService {
     return course;
   }
 
-  async getCourseWithUpdateId(id: string) {
+  async getCourseWithUpdateId(id: string, token: string) {
     const course = await this.courseModel
       .findById(id)
       .populate({
@@ -514,8 +514,13 @@ export class CourseService {
       );
     }
 
+    const { _id } = await this.authService.getUserInfo(token);
+
     return {
-      ...course,
+      ...omit(course, ['students']),
+      is_enrolled: !!course.students?.some(
+        (st_id) => String(st_id) === String(_id),
+      ),
       category: (course.sub_category as unknown as CourseSubCategory)?.category,
       sub_category: course.sub_category?._id,
     };
@@ -663,7 +668,7 @@ export class CourseService {
     return this.getCourseById(id);
   }
 
-  async getCourses(query: GetCoursesQueryDto): Promise<RequestCourseArrayType> {
+  async getCourses(query: GetCoursesQueryDto, token: string) {
     const filter = {};
     const sort = {};
     if (query['sub-category-id']) {
@@ -700,12 +705,23 @@ export class CourseService {
       .limit(query.limit)
       .skip(query.offset)
       .sort({ ...sort })
-      .select('_id name description level_difficulty image is_free tags')
+      .select(
+        '_id name description level_difficulty image is_free tags  students',
+      )
       .populate('tags')
+      .lean()
       .exec();
     const total = await this.courseModel.countDocuments({ ...filter }).exec();
+    const { _id } = await this.authService.getUserInfo(token);
+
+    console.log(courses);
     return {
-      data: courses,
+      data: courses.map((course) => ({
+        ...omit(course, ['students']),
+        is_enrolled: !!course.students?.some(
+          (st_id) => String(st_id) === String(_id),
+        ),
+      })),
       total,
     };
   }
