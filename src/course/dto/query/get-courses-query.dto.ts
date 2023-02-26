@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { IsValidId } from 'src/common/validators/query-object-id-validator.decorator';
 import { Transform } from 'class-transformer';
-import { toNumber } from 'src/common/helpers/query.helper';
+import { toLowerCase, toNumber, trim } from 'src/common/helpers/query.helper';
 
 export class GetCoursesQueryDto {
   @ApiProperty({
@@ -52,4 +52,15 @@ export class GetCoursesQueryDto {
   @Transform(({ value }) => toNumber(value, { default: 0, min: 0 }))
   @IsNumber()
   readonly offset: number;
+
+  @Transform(({ value }) => trim(toLowerCase(value)))
+  @ApiProperty({
+    example: 'Course about IT',
+    description: 'Course name',
+    required: false,
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  readonly q?: string;
 }
