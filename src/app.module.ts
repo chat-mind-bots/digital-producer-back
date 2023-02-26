@@ -18,6 +18,7 @@ import { NewsModule } from './news/news.module';
 import { CourseModule } from './course/course.module';
 import { DocumentModule } from './document/document.module';
 import { TestModule } from './test/test.module';
+import { ConfigModule as ConfigAppModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { TestModule } from './test/test.module';
     CourseModule,
     DocumentModule,
     TestModule,
+    ConfigAppModule,
   ],
   controllers: [AppController],
   providers: [
