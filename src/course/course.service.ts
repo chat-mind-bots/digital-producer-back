@@ -328,7 +328,7 @@ export class CourseService {
     }
 
     const testIds = (
-      await this.testService.getTestsIdsWithToken(ids, token)
+      await this.testService.getQuestionsIdsWithToken(ids, token)
     ).map(({ _id }) => String(_id));
 
     const testIdsArray = sortBy(
@@ -349,7 +349,7 @@ export class CourseService {
   async removeTestFromLesson(id: string, testId: string, token: string) {
     const lesson = await this.getLessonByIdWithTokenCheck(id, token);
 
-    await this.testService.getTestWithToken(testId, token);
+    await this.testService.getQuestionWithToken(testId, token);
 
     if (!lesson.tests.some(({ _id }) => String(_id) === String(testId))) {
       throw new HttpException(
@@ -361,7 +361,7 @@ export class CourseService {
     const update = { $pull: { tests: testId } };
     const result = await lesson.updateOne(update).exec();
 
-    await this.testService.removeTest(testId, token);
+    await this.testService.removeQuestion(testId, token);
     return result;
   }
 

@@ -13,9 +13,9 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TestService } from 'src/test/test.service';
 import { Roles } from 'src/auth/roles-auth.decorator';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
-import { Test } from 'src/test/test.schema';
-import { CreateTestDto } from 'src/test/dto/create-test.dto';
-import { ChangeTestDto } from 'src/test/dto/change-test.dto';
+import { Question } from 'src/test/schemas/question.schema';
+import { CreateQuestionDto } from 'src/test/dto/create-question.dto';
+import { ChangeQuestionDto } from 'src/test/dto/change-question.dto';
 import { MongoIdPipe } from 'src/pipes/mongo-id.pipe';
 
 @Controller('test')
@@ -23,59 +23,59 @@ import { MongoIdPipe } from 'src/pipes/mongo-id.pipe';
 export class TestController {
   constructor(private readonly testService: TestService) {}
 
-  @ApiOperation({ summary: 'Create test' })
-  @ApiResponse({ status: 201, type: Test })
+  @ApiOperation({ summary: 'Create Question' })
+  @ApiResponse({ status: 201, type: Question })
   @Roles(UserRoleEnum.PRODUCER)
-  @Post()
-  async createTest(@Req() req, @Body() dto: CreateTestDto) {
+  @Post('question')
+  async createQuestion(@Req() req, @Body() dto: CreateQuestionDto) {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.testService.createTest(dto, token);
+    return this.testService.createQuestion(dto, token);
   }
 
-  @ApiOperation({ summary: 'Get test for user' })
-  @ApiResponse({ status: 200, type: Test })
+  @ApiOperation({ summary: 'Get Question for user' })
+  @ApiResponse({ status: 200, type: Question })
   @Roles(UserRoleEnum.USER)
   @UsePipes(MongoIdPipe)
-  @Get('/:id/for-user')
-  async getTestForUser(@Param('id') id: string) {
-    return this.testService.getTestWithOutRightAnswer(id);
+  @Get('question/:id/for-user')
+  async getQuestionForUser(@Param('id') id: string) {
+    return this.testService.getQuestionWithOutRightAnswer(id);
   }
 
-  @ApiOperation({ summary: 'Get test for owner' })
-  @ApiResponse({ status: 200, type: Test })
+  @ApiOperation({ summary: 'Get Question for owner' })
+  @ApiResponse({ status: 200, type: Question })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Get('/:id')
-  async getTest(@Req() req, @Param('id') id: string) {
+  @Get('question/:id')
+  async getQuestion(@Req() req, @Param('id') id: string) {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.testService.getTestWithToken(id, token);
+    return this.testService.getQuestionWithToken(id, token);
   }
 
-  @ApiOperation({ summary: 'Change test' })
-  @ApiResponse({ status: 200, type: Test })
+  @ApiOperation({ summary: 'Change Question' })
+  @ApiResponse({ status: 200, type: Question })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Patch('/:id')
-  async changeTest(
+  @Patch('question/:id')
+  async changeQuestion(
     @Req() req,
     @Param('id') id: string,
-    @Body() dto: ChangeTestDto,
+    @Body() dto: ChangeQuestionDto,
   ) {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.testService.changeTest(id, dto, token);
+    return this.testService.changeQuestion(id, dto, token);
   }
 
-  @ApiOperation({ summary: 'Remove test' })
-  @ApiResponse({ status: 200, type: Test })
+  @ApiOperation({ summary: 'Remove Question' })
+  @ApiResponse({ status: 200, type: Question })
   @Roles(UserRoleEnum.PRODUCER)
   @UsePipes(MongoIdPipe)
-  @Delete('/:id')
-  async removeTest(@Req() req, @Param('id') id: string) {
+  @Delete('question/:id')
+  async removeQuestion(@Req() req, @Param('id') id: string) {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.testService.removeTest(id, token);
+    return this.testService.removeQuestion(id, token);
   }
 }

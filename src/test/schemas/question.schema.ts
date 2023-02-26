@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from 'src/user/user.schema';
 
-export type TestDocument = Test & Document;
+export type QuestionDocument = Question & Document;
 
 export interface IAnswer {
   key: string;
@@ -22,7 +22,7 @@ export class Answer extends Document {
 
 export const AnswerSchema = SchemaFactory.createForClass(Answer);
 @Schema()
-export class Test {
+export class Question {
   @ApiProperty()
   @Prop({ required: false })
   name: string;
@@ -64,4 +64,4 @@ export class Test {
   updatedAt: Date;
 }
 
-export const TestSchema = SchemaFactory.createForClass(Test);
+export const QuestionSchema = SchemaFactory.createForClass(Question);
