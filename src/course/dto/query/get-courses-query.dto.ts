@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { IsValidId } from 'src/common/validators/query-object-id-validator.decorator';
 import { Transform } from 'class-transformer';
 import { toLowerCase, toNumber, trim } from 'src/common/helpers/query.helper';
+import { CurseSortByEnum } from 'src/course/enum/curse-sort-by.enum';
 
 export class GetCoursesQueryDto {
   @ApiProperty({
@@ -63,4 +64,27 @@ export class GetCoursesQueryDto {
   @IsString()
   @IsOptional()
   readonly q?: string;
+
+  @ApiProperty({
+    example: CurseSortByEnum.BY_DATE,
+    description: 'Sort by',
+    enum: CurseSortByEnum,
+    required: false,
+    type: String,
+  })
+  @IsString()
+  @IsEnum(CurseSortByEnum)
+  @IsOptional()
+  readonly 'sort-by'?: CurseSortByEnum;
+
+  @Transform(({ value }) => trim(toLowerCase(value)))
+  @ApiProperty({
+    example: 'asc',
+    description: 'Sort order. Values asc or desc only',
+    required: false,
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  readonly 'sort-order'?: 'asc' | 'desc';
 }
