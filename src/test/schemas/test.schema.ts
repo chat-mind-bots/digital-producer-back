@@ -2,21 +2,40 @@ import { Document, now, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from 'src/user/user.schema';
-import {
-  Answer,
-  AnswerSchema,
-  IAnswer,
-  Question,
-} from 'src/test/schemas/question.schema';
+import { Question } from 'src/test/schemas/question.schema';
 import { ProgressStatusEnum } from 'src/test/enum/progress-status.enum';
 import { CourseLesson } from 'src/course/schemas/course-lesson.schema';
 
 export type TestDocument = Test & Document;
 
+export interface IProgressAnswer {
+  question: string;
+  answer_key: string[];
+  result: boolean;
+}
+
+@Schema()
+export class ProgressAnswer extends Document {
+  @ApiProperty()
+  @Prop({ required: true, type: Types.ObjectId, ref: Question.name })
+  question: Types.ObjectId;
+
+  @ApiProperty()
+  @Prop({ required: true, type: [String] })
+  answer_key: string[];
+
+  @ApiProperty()
+  @Prop({ required: false, type: Boolean })
+  result: boolean;
+}
+export const ProgressAnswerSchema =
+  SchemaFactory.createForClass(ProgressAnswer);
+
 export interface IProgress {
   status: ProgressStatusEnum;
-  answers: IAnswer[];
+  answers: IProgressAnswer[];
   duration: number;
+  result?: number;
   user: string;
 }
 @Schema()
@@ -30,8 +49,13 @@ export class Progress extends Document {
   status: ProgressStatusEnum;
 
   @ApiProperty()
-  @Prop({ required: true, type: [AnswerSchema], ref: Answer.name, default: [] })
-  answers: [IAnswer];
+  @Prop({
+    required: true,
+    type: [ProgressAnswerSchema],
+    ref: ProgressAnswer.name,
+    default: [],
+  })
+  answers: [IProgressAnswer];
 
   @ApiProperty()
   @Prop({ required: true, type: Number })
@@ -40,6 +64,10 @@ export class Progress extends Document {
   @ApiProperty()
   @Prop({ required: true, type: Types.ObjectId, ref: User.name })
   user: Types.ObjectId;
+
+  @ApiProperty()
+  @Prop({ required: false, type: Number })
+  result: number;
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(Progress);

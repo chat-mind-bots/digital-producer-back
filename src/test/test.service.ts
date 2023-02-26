@@ -6,17 +6,23 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { omit } from 'lodash';
+import { isEqual, omit, sortBy } from 'lodash';
 import { Question, QuestionDocument } from 'src/test/schemas/question.schema';
 import { Model, Types } from 'mongoose';
 import { CreateQuestionDto } from 'src/test/dto/create-question.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { ChangeQuestionDto } from 'src/test/dto/change-question.dto';
-import { Test, TestDocument } from 'src/test/schemas/test.schema';
+import {
+  IProgressAnswer,
+  Test,
+  TestDocument,
+} from 'src/test/schemas/test.schema';
 import { ChangeTestDto } from 'src/test/dto/change-test.dto';
 import { CreateTestDto } from 'src/test/dto/create-test.dto';
 import { AddQuestionToTestQueryDto } from 'src/test/dto/query/add-question-to-test-query.dto';
 import { CourseService } from 'src/course/course.service';
+import { AddProgressToTestDto } from 'src/test/dto/add-progress-to-test.dto';
+import { ProgressStatusEnum } from 'src/test/enum/progress-status.enum';
 
 @Injectable()
 export class TestService {
@@ -309,12 +315,124 @@ export class TestService {
       .populate({ path: 'questions', select: '-right_answer -right_answers' })
       .exec();
 
-    // if (!test) {
-    //   throw new HttpException(
-    //     'Document (Test) not found',
-    //     HttpStatus.NOT_FOUND,
-    //   );
-    // }
     return test;
+  }
+
+  async answerCheck(answer: IProgressAnswer) {
+    const question = await this.getQuestionById(answer.question);
+
+    const { answer_key } = answer;
+
+    if (question.is_multiply) {
+      const sortedArray1 = sortBy(question.right_answers);
+      const sortedArray2 = sortBy(answer_key);
+
+      return isEqual(
+        omit(sortedArray1, ['length']),
+        omit(sortedArray2, ['length']),
+      );
+    }
+    return answer_key.some((key) => key === question.right_answer);
+  }
+
+  async addProgressToTest(
+    id: string,
+    dto: AddProgressToTestDto,
+    token: string,
+  ) {
+    const { _id: userId } = await this.authService.getUserInfo(token);
+
+    const { status, duration, answers } = dto;
+
+    const test = await this.testModel.findById(id).select('progress').exec();
+
+    if (!test) {
+      throw new HttpException(
+        'Document (Test) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const progressIndex = test.progress.findIndex(
+      (p) => p.user.toString() === userId.toString(),
+    );
+
+    const doneAnswers: IProgressAnswer[] = [];
+    let resultCounter = 0;
+    if (status === ProgressStatusEnum.DONE) {
+      for (const answer of answers) {
+        const result = await this.answerCheck(answer);
+        if (result) {
+          resultCounter++;
+        }
+        doneAnswers.push({ ...answer, result });
+      }
+    }
+    if (progressIndex !== -1) {
+      await this.testModel
+        .updateOne(
+          { _id: id },
+          {
+            $set: {
+              [`progress.${progressIndex}.status`]: status,
+              [`progress.${progressIndex}.duration`]: duration,
+              ...(status === ProgressStatusEnum.DONE
+                ? { [`progress.${progressIndex}.result`]: resultCounter }
+                : {}),
+              [`progress.${progressIndex}.answers`]:
+                status === ProgressStatusEnum.DONE ? doneAnswers : answers,
+            },
+          },
+        )
+        .exec();
+    } else {
+      const newProgress = {
+        user: new Types.ObjectId(userId),
+        status,
+        duration,
+        ...(status === ProgressStatusEnum.DONE
+          ? { result: resultCounter }
+          : {}),
+        answers: status === ProgressStatusEnum.DONE ? doneAnswers : answers,
+      };
+      await this.testModel
+        .updateOne({ _id: id }, { $push: { progress: newProgress } })
+        .exec();
+    }
+
+    const updatedTest = await this.testModel
+      .findById(id)
+      .select({ progress: { $elemMatch: { user: userId } } })
+      .exec();
+
+    return updatedTest.progress[0];
+  }
+
+  async getUserProgress(lessonId: string, token: string) {
+    const { _id: userId } = await this.authService.getUserInfo(token);
+
+    const test = await this.testModel
+      .findOne({ lesson: new Types.ObjectId(String(lessonId)) })
+      .select({ progress: { $elemMatch: { user: userId } } })
+      .select('questions')
+      .exec();
+
+    if (!test) {
+      return {};
+    }
+    if (test.progress[0]?.status !== ProgressStatusEnum.DONE) {
+      return {
+        test_status: test.progress[0]?.status,
+      };
+    }
+
+    const allQuestions = test.questions?.length;
+    const rightAnswers = test.progress[0]?.result;
+
+    return {
+      total_questions: allQuestions,
+      total_points: rightAnswers,
+      test_status: test.progress[0]?.status,
+    };
   }
 }
