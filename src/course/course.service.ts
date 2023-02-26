@@ -699,6 +699,9 @@ export class CourseService {
         $in: ownerIdsArray.map((ownerId) => new Types.ObjectId(ownerId)),
       };
     }
+    if (query.q) {
+      filter['$or'] = [{ name: { $regex: query.q, $options: 'i' } }];
+    }
 
     const courses = await this.courseModel
       .find({ ...filter })
