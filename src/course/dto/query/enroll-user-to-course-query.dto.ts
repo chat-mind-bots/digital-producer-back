@@ -5,7 +5,7 @@ import { IsValidId } from 'src/common/validators/query-object-id-validator.decor
 export class EnrollUserToCourseQueryDto {
   @ApiProperty({
     example: ['83f...', 'c32...', '9a7...'],
-    description: 'Array of sub-categories ids',
+    description: 'Array of users ids',
     required: false,
   })
   @IsOptional()
