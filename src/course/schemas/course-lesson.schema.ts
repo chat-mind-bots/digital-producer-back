@@ -50,10 +50,6 @@ export class CourseLesson {
   tests: [Types.ObjectId];
 
   @ApiProperty()
-  @Prop({ required: true, type: Number, default: 0 })
-  number_of_points_to_pass: number;
-
-  @ApiProperty()
   @Prop({ default: now() })
   createdAt: Date;
 
