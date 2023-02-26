@@ -6,7 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { omit, sortBy, unionBy } from 'lodash';
+import { omit } from 'lodash';
 import {
   CourseCategory,
   CourseCategoryDocument,
@@ -38,7 +38,6 @@ import { TagsService } from 'src/tags/tags.service';
 import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { TestService } from 'src/test/test.service';
-import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
@@ -196,7 +195,7 @@ export class CourseService {
 
   // LESSONS
 
-  async getLessonById(id: string) {
+  async getLessonByIdWithTest(id: string) {
     const lesson = await this.courseLessonModel
       .findById(id)
       .populate({
@@ -204,10 +203,33 @@ export class CourseService {
         select: '_id first_name photos',
       })
       .populate('documents')
+      .lean()
+      .exec();
+
+    if (!lesson) {
+      throw new HttpException(
+        'Document (Course Lesson) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return {
+      ...lesson,
+      test: await this.testService.getTestByLessonId(id),
+    };
+  }
+
+  async getLessonById(id: string) {
+    const lesson = await this.courseLessonModel
+      .findById(id)
       .populate({
-        path: 'tests',
-        select: '-right_answer',
-      });
+        path: 'owner',
+        select: '_id first_name photos',
+      })
+      .populate('documents');
+    // .populate({
+    //   path: 'tests',
+    //   select: '-right_answer',
+    // });
     if (!lesson) {
       throw new HttpException(
         'Document (Course Lesson) not found',
@@ -310,60 +332,60 @@ export class CourseService {
     return result;
   }
 
-  async addTestToLesson(
-    id: string,
-    query: AddTestToCourseLessonQueryDto,
-    token: string,
-  ) {
-    const lesson = await this.getLessonByIdWithTokenCheck(id, token);
+  // async addTestToLesson(
+  //   id: string,
+  //   query: AddTestToCourseLessonQueryDto,
+  //   token: string,
+  // ) {
+  //   const lesson = await this.getLessonByIdWithTokenCheck(id, token);
+  //
+  //   const ids = [];
+  //
+  //   if (query['test-id']) {
+  //     const testIdsArray = Array.isArray(query['test-id'])
+  //       ? query['test-id']
+  //       : [query['test-id']];
+  //
+  //     ids.push(...testIdsArray);
+  //   }
+  //
+  //   const testIds = (
+  //     await this.testService.getQuestionsIdsWithToken(ids, token)
+  //   ).map(({ _id }) => String(_id));
+  //
+  //   const testIdsArray = sortBy(
+  //     unionBy(
+  //       testIds,
+  //       lesson.tests.map(({ _id }) => String(_id)),
+  //       (item) => item,
+  //     ),
+  //   );
+  //
+  //   await lesson.updateOne({
+  //     tests: [...testIdsArray.map((id) => new Types.ObjectId(id))],
+  //   });
+  //
+  //   return this.getLessonById(id);
+  // }
 
-    const ids = [];
-
-    if (query['test-id']) {
-      const testIdsArray = Array.isArray(query['test-id'])
-        ? query['test-id']
-        : [query['test-id']];
-
-      ids.push(...testIdsArray);
-    }
-
-    const testIds = (
-      await this.testService.getTestsIdsWithToken(ids, token)
-    ).map(({ _id }) => String(_id));
-
-    const testIdsArray = sortBy(
-      unionBy(
-        testIds,
-        lesson.tests.map(({ _id }) => String(_id)),
-        (item) => item,
-      ),
-    );
-
-    await lesson.updateOne({
-      tests: [...testIdsArray.map((id) => new Types.ObjectId(id))],
-    });
-
-    return this.getLessonById(id);
-  }
-
-  async removeTestFromLesson(id: string, testId: string, token: string) {
-    const lesson = await this.getLessonByIdWithTokenCheck(id, token);
-
-    await this.testService.getTestWithToken(testId, token);
-
-    if (!lesson.tests.some(({ _id }) => String(_id) === String(testId))) {
-      throw new HttpException(
-        `This test does not belong to the selected document`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const update = { $pull: { tests: testId } };
-    const result = await lesson.updateOne(update).exec();
-
-    await this.testService.removeTest(testId, token);
-    return result;
-  }
+  // async removeTestFromLesson(id: string, testId: string, token: string) {
+  //   const lesson = await this.getLessonByIdWithTokenCheck(id, token);
+  //
+  //   await this.testService.getQuestionWithToken(testId, token);
+  //
+  //   if (!lesson.tests.some(({ _id }) => String(_id) === String(testId))) {
+  //     throw new HttpException(
+  //       `This test does not belong to the selected document`,
+  //       HttpStatus.NOT_FOUND,
+  //     );
+  //   }
+  //
+  //   const update = { $pull: { tests: testId } };
+  //   const result = await lesson.updateOne(update).exec();
+  //
+  //   await this.testService.removeQuestion(testId, token);
+  //   return result;
+  // }
 
   // MODULES
 
@@ -688,6 +710,9 @@ export class CourseService {
         ? query['owner-id']
         : [query['owner-id']];
 
+      if (ownerIdsArray.some((id) => String(id) === String(_id))) {
+        delete filter.status;
+      }
       filter['owner'] = {
         $in: ownerIdsArray.map((ownerId) => new Types.ObjectId(ownerId)),
       };
@@ -731,6 +756,7 @@ export class CourseService {
       .populate('tags')
       .lean()
       .exec();
+
     const total = await this.courseModel.countDocuments({ ...filter }).exec();
 
     return {

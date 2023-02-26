@@ -4,7 +4,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CourseLevelDifficultlyEnum } from 'src/course/enum/course-level-dificultly.enum';
 import { Documents } from 'src/document/document.schema';
 import { User } from 'src/user/user.schema';
-import { Test } from 'src/test/test.schema';
 
 @Schema()
 export class CourseLesson {
@@ -45,9 +44,14 @@ export class CourseLesson {
   @Prop({ required: true, type: Types.ObjectId, ref: User.name })
   owner: Types.ObjectId;
 
-  @ApiProperty()
-  @Prop({ required: true, type: [Types.ObjectId], ref: Test.name, default: [] })
-  tests: [Types.ObjectId];
+  // @ApiProperty()
+  // @Prop({
+  //   required: true,
+  //   type: [Types.ObjectId],
+  //   ref: Question.name,
+  //   default: [],
+  // })
+  // tests: [Types.ObjectId];
 
   @ApiProperty()
   @Prop({ default: now() })

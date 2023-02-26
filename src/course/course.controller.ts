@@ -40,8 +40,6 @@ import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
 import { AddModuleToCourseCourseQueryDto } from 'src/course/dto/query/add-module-to-course-course-query.dto';
 import { RequestCourseArrayType } from 'src/course/type/request-course-array.type';
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
-import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
-import { RemoveTestFromCourseLessonQueryDto } from 'src/course/dto/query/remove-test-from-course-lesson-query.dto';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 import { UpdateCourseStatusQueryDto } from 'src/course/dto/query/update-course-status-query.dto';
 
@@ -163,7 +161,7 @@ export class CourseController {
   @UsePipes(MongoIdPipe)
   @Get('lesson/:id')
   async getCourseLesson(@Param('id') id: string) {
-    return this.courseService.getLessonById(id);
+    return this.courseService.getLessonByIdWithTest(id);
   }
 
   @ApiOperation({ summary: 'Change course lesson' })
@@ -230,35 +228,35 @@ export class CourseController {
     );
   }
 
-  @ApiOperation({ summary: 'Add test or tests array to course lesson' })
-  @ApiResponse({ status: 200, type: CourseLesson })
-  @Roles(UserRoleEnum.PRODUCER)
-  @UsePipes(MongoIdPipe)
-  @Patch('lesson/:id/test')
-  async addTestToCourseLesson(
-    @Req() req,
-    @Param('id') id: string,
-    @Query() query: AddTestToCourseLessonQueryDto,
-  ) {
-    const bearer = req.headers.authorization;
-    const token = bearer.split('Bearer ')[1];
-    return this.courseService.addTestToLesson(id, query, token);
-  }
-
-  @ApiOperation({ summary: 'Remove test from course lesson' })
-  @ApiResponse({ status: 200, type: CourseLesson })
-  @Roles(UserRoleEnum.PRODUCER)
-  @UsePipes(MongoIdPipe)
-  @Delete('lesson/:id/test')
-  async removeTestFromCourseLesson(
-    @Req() req,
-    @Param('id') id: string,
-    @Query() query: RemoveTestFromCourseLessonQueryDto,
-  ) {
-    const bearer = req.headers.authorization;
-    const token = bearer.split('Bearer ')[1];
-    return this.courseService.removeTestFromLesson(id, query['test-id'], token);
-  }
+  // @ApiOperation({ summary: 'Add test or tests array to course lesson' })
+  // @ApiResponse({ status: 200, type: CourseLesson })
+  // @Roles(UserRoleEnum.PRODUCER)
+  // @UsePipes(MongoIdPipe)
+  // @Patch('lesson/:id/test')
+  // async addTestToCourseLesson(
+  //   @Req() req,
+  //   @Param('id') id: string,
+  //   @Query() query: AddTestToCourseLessonQueryDto,
+  // ) {
+  //   const bearer = req.headers.authorization;
+  //   const token = bearer.split('Bearer ')[1];
+  //   return this.courseService.addTestToLesson(id, query, token);
+  // }
+  //
+  // @ApiOperation({ summary: 'Remove test from course lesson' })
+  // @ApiResponse({ status: 200, type: CourseLesson })
+  // @Roles(UserRoleEnum.PRODUCER)
+  // @UsePipes(MongoIdPipe)
+  // @Delete('lesson/:id/test')
+  // async removeTestFromCourseLesson(
+  //   @Req() req,
+  //   @Param('id') id: string,
+  //   @Query() query: RemoveTestFromCourseLessonQueryDto,
+  // ) {
+  //   const bearer = req.headers.authorization;
+  //   const token = bearer.split('Bearer ')[1];
+  //   return this.courseService.removeTestFromLesson(id, query['test-id'], token);
+  // }
 
   // Module
 
