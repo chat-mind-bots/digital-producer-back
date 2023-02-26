@@ -5,7 +5,7 @@ import { Roles } from 'src/auth/roles-auth.decorator';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/user.schema';
-import { RequestArrayType } from './types/request-array.type';
+import { RequestUsersArrayType } from './types/request-array.type';
 import { UserGetQueryDto } from 'src/user/dto/query/user-get-query.dto';
 
 @Controller('user')
@@ -68,7 +68,7 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Get users list' })
-  @ApiResponse({ status: 200, type: RequestArrayType })
+  @ApiResponse({ status: 200, type: RequestUsersArrayType })
   @Roles(UserRoleEnum.PRODUCER)
   @Get()
   async getUsers(@Query() query: UserGetQueryDto) {

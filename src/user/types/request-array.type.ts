@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/user/user.schema';
 
-export class RequestArrayType {
+export class RequestUsersArrayType {
   @ApiProperty({
     type: [User],
   })

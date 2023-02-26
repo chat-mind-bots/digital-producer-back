@@ -53,12 +53,4 @@ export class CreateCourseLessonDto {
   })
   @IsNumber()
   readonly logic_number: number;
-
-  @ApiProperty({
-    example: 1,
-    description: 'Number of points for tests to pass lesson',
-    required: true,
-  })
-  @IsNumber()
-  readonly number_of_points_to_pass: number;
 }
