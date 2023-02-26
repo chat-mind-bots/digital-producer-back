@@ -43,6 +43,7 @@ import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
 import { RemoveTestFromCourseLessonQueryDto } from 'src/course/dto/query/remove-test-from-course-lesson-query.dto';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
+import { UpdateCourseStatusQueryDto } from 'src/course/dto/query/update-course-status-query.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -497,5 +498,22 @@ export class CourseController {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
     return this.courseService.enrollToCourseAnotherUser(id, query, token);
+  }
+
+  @ApiOperation({
+    summary: 'Update course status',
+  })
+  @ApiResponse({ status: 200, type: Course })
+  @Roles(UserRoleEnum.PRODUCER)
+  @UsePipes(MongoIdPipe)
+  @Patch(':id/update-course-status')
+  async updateCourseStatus(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: UpdateCourseStatusQueryDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.changeCourseStatus(id, query.status, token);
   }
 }

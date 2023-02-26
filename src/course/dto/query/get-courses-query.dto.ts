@@ -4,6 +4,7 @@ import { IsValidId } from 'src/common/validators/query-object-id-validator.decor
 import { Transform } from 'class-transformer';
 import { toLowerCase, toNumber, trim } from 'src/common/helpers/query.helper';
 import { CurseSortByEnum } from 'src/course/enum/curse-sort-by.enum';
+import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 
 export class GetCoursesQueryDto {
   @ApiProperty({
@@ -87,4 +88,16 @@ export class GetCoursesQueryDto {
   @IsString()
   @IsOptional()
   readonly 'sort-order'?: 'asc' | 'desc';
+
+  @ApiProperty({
+    example: CurseStatusEnum.IN_REVIEW,
+    description: 'Course status',
+    enum: CurseStatusEnum,
+    required: false,
+    type: String,
+  })
+  @IsString()
+  @IsEnum(CurseStatusEnum)
+  @IsOptional()
+  readonly status?: CurseStatusEnum;
 }
