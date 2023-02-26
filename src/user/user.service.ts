@@ -19,7 +19,10 @@ export class UserService {
   async findById(id: string) {
     const user = await this.userModel.findById(id);
     if (!user) {
-      throw new HttpException('Document not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'Document (User) not found',
+        HttpStatus.NOT_FOUND,
+      );
     }
     return user;
   }
@@ -65,5 +68,19 @@ export class UserService {
       data: users,
       total,
     };
+  }
+  async findByUserName(q: string) {
+    const user = await this.userModel
+      .findOne({ username: q })
+      .select('first_name username photos')
+      .exec();
+
+    if (!user) {
+      throw new HttpException(
+        'Document (User) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return user;
   }
 }
