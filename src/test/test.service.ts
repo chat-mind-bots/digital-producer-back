@@ -172,7 +172,9 @@ export class TestService {
     const { _id } = await this.authService.getUserInfo(token);
 
     const { lesson_id } = dto;
+
     const lesson = await this.courseService.getLessonById(lesson_id);
+
     const test = await this.testModel.create({
       ...dto,
       owner: _id,

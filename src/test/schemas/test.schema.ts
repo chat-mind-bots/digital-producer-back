@@ -70,7 +70,7 @@ export class Test {
   @ApiProperty()
   @Prop({
     required: true,
-    type: ProgressSchema,
+    type: [ProgressSchema],
     default: [],
   })
   progress: IProgress[];

@@ -38,7 +38,6 @@ import { TagsService } from 'src/tags/tags.service';
 import { ChangeCourseDto } from 'src/course/dto/course/change-course.dto';
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { TestService } from 'src/test/test.service';
-import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
@@ -711,6 +710,9 @@ export class CourseService {
         ? query['owner-id']
         : [query['owner-id']];
 
+      if (ownerIdsArray.some((id) => String(id) === String(_id))) {
+        delete filter.status;
+      }
       filter['owner'] = {
         $in: ownerIdsArray.map((ownerId) => new Types.ObjectId(ownerId)),
       };
@@ -754,6 +756,7 @@ export class CourseService {
       .populate('tags')
       .lean()
       .exec();
+
     const total = await this.courseModel.countDocuments({ ...filter }).exec();
 
     return {
