@@ -201,7 +201,7 @@ export class CourseService {
       .findById(id)
       .populate({
         path: 'owner',
-        select: '_id first_name',
+        select: '_id first_name photos',
       })
       .populate('documents')
       .populate({
@@ -372,7 +372,7 @@ export class CourseService {
       .findById(id)
       .populate({
         path: 'owner',
-        select: '_id first_name',
+        select: '_id first_name photos',
       })
       .populate({
         path: 'lessons',
@@ -467,7 +467,7 @@ export class CourseService {
       .findById(id)
       .populate({
         path: 'owner',
-        select: '_id first_name',
+        select: '_id first_name photos',
       })
       .populate({
         path: 'modules',
@@ -493,7 +493,7 @@ export class CourseService {
       .findById(id)
       .populate({
         path: 'owner',
-        select: '_id first_name',
+        select: '_id first_name photos',
       })
       .populate({
         path: 'modules',
