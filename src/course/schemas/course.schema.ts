@@ -73,7 +73,7 @@ export class Course {
   @Prop({
     required: true,
     default: CurseStatusEnum.IN_PROGRESS,
-    type: Number,
+    type: String,
     enum: CurseStatusEnum,
   })
   status: CurseStatusEnum;

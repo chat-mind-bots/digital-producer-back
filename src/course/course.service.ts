@@ -6,14 +6,13 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { unionBy, sortBy } from 'lodash';
+import { omit, sortBy, unionBy } from 'lodash';
 import {
   CourseCategory,
   CourseCategoryDocument,
   CourseSubCategory,
   CourseSubCategoryDocument,
 } from 'src/course/schemas/course-category.schema';
-import { omit } from 'lodash';
 import { Model, Types } from 'mongoose';
 import { CreateCourseCategoryDto } from 'src/course/dto/category/create-course-category.dto';
 import { CreateCourseSubCategoryDto } from 'src/course/dto/sub-category/create-course-sub-category.dto';
@@ -41,6 +40,8 @@ import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { TestService } from 'src/test/test.service';
 import { AddTestToCourseLessonQueryDto } from 'src/course/dto/query/add-test-to-course-lesson-query.dto';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
+import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 @Injectable()
 export class CourseService {
@@ -669,7 +670,8 @@ export class CourseService {
   }
 
   async getCourses(query: GetCoursesQueryDto, token: string) {
-    const filter = {};
+    const { _id, role } = await this.authService.getUserInfo(token);
+    const filter = { status: CurseStatusEnum.AVAILABLE };
     const sort = {};
     if (query['sub-category-id']) {
       const subCategoriesIdsArray = Array.isArray(query['sub-category-id'])
@@ -705,6 +707,18 @@ export class CourseService {
     if (query['sort-by']) {
       sort[query['sort-by']] = query['sort-order'] === 'asc' ? 1 : -1;
     }
+    if (query['status']) {
+      if (role.some((role) => role === UserRoleEnum.ADMIN)) {
+        filter['status'] = query['status'];
+      } else if (filter['owner'].some((id) => String(id) === String(_id))) {
+        filter['status'] = query['status'];
+      } else {
+        throw new HttpException(
+          `You cannot use status filter, because you are not admin or owner of course`,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
 
     const courses = await this.courseModel
       .find({ ...filter })
@@ -712,13 +726,12 @@ export class CourseService {
       .skip(query.offset)
       .sort({ ...sort })
       .select(
-        '_id name description level_difficulty image is_free tags  students',
+        '_id name description level_difficulty image is_free tags  students status',
       )
       .populate('tags')
       .lean()
       .exec();
     const total = await this.courseModel.countDocuments({ ...filter }).exec();
-    const { _id } = await this.authService.getUserInfo(token);
 
     return {
       data: courses.map((course) => ({
@@ -797,6 +810,37 @@ export class CourseService {
       $addToSet: { students: userIdsArray.map((id) => new Types.ObjectId(id)) },
     });
 
+    return this.getCourseById(id);
+  }
+
+  async changeCourseStatus(id: string, status: CurseStatusEnum, token: string) {
+    const user = await this.authService.getUserInfo(token);
+    const course = await this.getCourseById(id);
+
+    if (user.role.some((role) => role === UserRoleEnum.ADMIN)) {
+      await course.updateOne({ status });
+      return this.getCourseById(id);
+    }
+    if (String(course.owner._id) !== String(user._id)) {
+      throw new HttpException(
+        `You are can not update course status, because you are not owner of this course`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (course.status === CurseStatusEnum.IN_REVIEW) {
+      throw new HttpException(
+        `You are can not update course status, because now course in review`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (status === CurseStatusEnum.APPROVED) {
+      throw new HttpException(
+        `You are can not update course status to APPROVED, because you are not admin`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    await course.updateOne({ status });
     return this.getCourseById(id);
   }
 }
