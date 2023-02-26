@@ -22,6 +22,7 @@ import { Test } from 'src/test/schemas/test.schema';
 import { CreateTestDto } from 'src/test/dto/create-test.dto';
 import { ChangeTestDto } from 'src/test/dto/change-test.dto';
 import { AddQuestionToTestQueryDto } from 'src/test/dto/query/add-question-to-test-query.dto';
+import { AddProgressToTestDto } from 'src/test/dto/add-progress-to-test.dto';
 
 @Controller('test')
 @ApiTags('test')
@@ -157,5 +158,21 @@ export class TestController {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
     return this.testService.removeQuestionFromTest(id, query, token);
+  }
+
+  @ApiOperation({ summary: 'Add user Progress to Test' })
+  @ApiResponse({ status: 200, type: Test })
+  @Roles(UserRoleEnum.USER)
+  @UsePipes(MongoIdPipe)
+  @Post(':id/progress')
+  async addProgressToTest(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() dto: AddProgressToTestDto,
+  ) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    // console.log(dto);
+    return this.testService.addProgressToTest(id, dto, token);
   }
 }
