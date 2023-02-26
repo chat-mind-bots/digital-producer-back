@@ -4,8 +4,8 @@ import { Answer, IAnswer } from 'src/test/schemas/question.schema';
 
 export class ChangeQuestionDto {
   @ApiProperty({
-    example: 'Test name',
-    description: 'Test name',
+    example: 'Question name',
+    description: 'Question name',
     required: false,
   })
   @IsOptional()
@@ -13,8 +13,8 @@ export class ChangeQuestionDto {
   readonly name?: string;
 
   @ApiProperty({
-    example: 'Test description',
-    description: 'Test description',
+    example: 'Question description',
+    description: 'Question description',
     required: false,
   })
   @IsOptional()
@@ -22,8 +22,8 @@ export class ChangeQuestionDto {
   readonly description?: string;
 
   @ApiProperty({
-    example: 'Test question',
-    description: 'Test question',
+    example: 'Question question',
+    description: 'Question question',
     required: true,
   })
   @IsOptional()

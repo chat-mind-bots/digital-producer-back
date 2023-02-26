@@ -6,7 +6,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { omit, sortBy, unionBy } from 'lodash';
+import { omit } from 'lodash';
 import {
   CourseCategory,
   CourseCategoryDocument,
@@ -196,7 +196,7 @@ export class CourseService {
 
   // LESSONS
 
-  async getLessonById(id: string) {
+  async getLessonByIdWithTest(id: string) {
     const lesson = await this.courseLessonModel
       .findById(id)
       .populate({
@@ -204,10 +204,33 @@ export class CourseService {
         select: '_id first_name photos',
       })
       .populate('documents')
+      .lean()
+      .exec();
+
+    if (!lesson) {
+      throw new HttpException(
+        'Document (Course Lesson) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return {
+      ...lesson,
+      test: await this.testService.getTestByLessonId(id),
+    };
+  }
+
+  async getLessonById(id: string) {
+    const lesson = await this.courseLessonModel
+      .findById(id)
       .populate({
-        path: 'tests',
-        select: '-right_answer',
-      });
+        path: 'owner',
+        select: '_id first_name photos',
+      })
+      .populate('documents');
+    // .populate({
+    //   path: 'tests',
+    //   select: '-right_answer',
+    // });
     if (!lesson) {
       throw new HttpException(
         'Document (Course Lesson) not found',
@@ -310,60 +333,60 @@ export class CourseService {
     return result;
   }
 
-  async addTestToLesson(
-    id: string,
-    query: AddTestToCourseLessonQueryDto,
-    token: string,
-  ) {
-    const lesson = await this.getLessonByIdWithTokenCheck(id, token);
+  // async addTestToLesson(
+  //   id: string,
+  //   query: AddTestToCourseLessonQueryDto,
+  //   token: string,
+  // ) {
+  //   const lesson = await this.getLessonByIdWithTokenCheck(id, token);
+  //
+  //   const ids = [];
+  //
+  //   if (query['test-id']) {
+  //     const testIdsArray = Array.isArray(query['test-id'])
+  //       ? query['test-id']
+  //       : [query['test-id']];
+  //
+  //     ids.push(...testIdsArray);
+  //   }
+  //
+  //   const testIds = (
+  //     await this.testService.getQuestionsIdsWithToken(ids, token)
+  //   ).map(({ _id }) => String(_id));
+  //
+  //   const testIdsArray = sortBy(
+  //     unionBy(
+  //       testIds,
+  //       lesson.tests.map(({ _id }) => String(_id)),
+  //       (item) => item,
+  //     ),
+  //   );
+  //
+  //   await lesson.updateOne({
+  //     tests: [...testIdsArray.map((id) => new Types.ObjectId(id))],
+  //   });
+  //
+  //   return this.getLessonById(id);
+  // }
 
-    const ids = [];
-
-    if (query['test-id']) {
-      const testIdsArray = Array.isArray(query['test-id'])
-        ? query['test-id']
-        : [query['test-id']];
-
-      ids.push(...testIdsArray);
-    }
-
-    const testIds = (
-      await this.testService.getQuestionsIdsWithToken(ids, token)
-    ).map(({ _id }) => String(_id));
-
-    const testIdsArray = sortBy(
-      unionBy(
-        testIds,
-        lesson.tests.map(({ _id }) => String(_id)),
-        (item) => item,
-      ),
-    );
-
-    await lesson.updateOne({
-      tests: [...testIdsArray.map((id) => new Types.ObjectId(id))],
-    });
-
-    return this.getLessonById(id);
-  }
-
-  async removeTestFromLesson(id: string, testId: string, token: string) {
-    const lesson = await this.getLessonByIdWithTokenCheck(id, token);
-
-    await this.testService.getQuestionWithToken(testId, token);
-
-    if (!lesson.tests.some(({ _id }) => String(_id) === String(testId))) {
-      throw new HttpException(
-        `This test does not belong to the selected document`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const update = { $pull: { tests: testId } };
-    const result = await lesson.updateOne(update).exec();
-
-    await this.testService.removeQuestion(testId, token);
-    return result;
-  }
+  // async removeTestFromLesson(id: string, testId: string, token: string) {
+  //   const lesson = await this.getLessonByIdWithTokenCheck(id, token);
+  //
+  //   await this.testService.getQuestionWithToken(testId, token);
+  //
+  //   if (!lesson.tests.some(({ _id }) => String(_id) === String(testId))) {
+  //     throw new HttpException(
+  //       `This test does not belong to the selected document`,
+  //       HttpStatus.NOT_FOUND,
+  //     );
+  //   }
+  //
+  //   const update = { $pull: { tests: testId } };
+  //   const result = await lesson.updateOne(update).exec();
+  //
+  //   await this.testService.removeQuestion(testId, token);
+  //   return result;
+  // }
 
   // MODULES
 

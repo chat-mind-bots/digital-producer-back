@@ -6,19 +6,29 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { omit } from 'lodash';
 import { Question, QuestionDocument } from 'src/test/schemas/question.schema';
 import { Model, Types } from 'mongoose';
 import { CreateQuestionDto } from 'src/test/dto/create-question.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { ChangeQuestionDto } from 'src/test/dto/change-question.dto';
+import { Test, TestDocument } from 'src/test/schemas/test.schema';
+import { ChangeTestDto } from 'src/test/dto/change-test.dto';
+import { CreateTestDto } from 'src/test/dto/create-test.dto';
+import { AddQuestionToTestQueryDto } from 'src/test/dto/query/add-question-to-test-query.dto';
+import { CourseService } from 'src/course/course.service';
 
 @Injectable()
 export class TestService {
   constructor(
     @InjectModel(Question.name)
     private readonly questionModel: Model<QuestionDocument>,
+    @InjectModel(Test.name)
+    private readonly testModel: Model<TestDocument>,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    @Inject(forwardRef(() => CourseService))
+    private readonly courseService: CourseService,
   ) {}
 
   async getQuestionById(id: string) {
@@ -97,8 +107,212 @@ export class TestService {
     return result;
   }
 
-  async actionQuestion(id: string, answer: string) {
-    const question = await this.getQuestionById(id);
-    return question.right_answer === answer;
+  // async actionQuestion(id: string, answer: string) {
+  //   const question = await this.getQuestionById(id);
+  //   return question.right_answer === answer;
+  // }
+  async getTestById(id: string) {
+    const test = await this.testModel
+      .findById(id)
+      .select('-progress')
+      .populate({ path: 'owner', select: '_id first_name photos' })
+      .populate({ path: 'questions' })
+      .exec();
+    if (!test) {
+      throw new HttpException(
+        'Document (Test) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return test;
+  }
+
+  async getTestByIdForUser(id: string) {
+    // const { _id } = await this.authService.getUserInfo(token);
+
+    const test = await this.testModel
+      .findById(id)
+      .select('-progress')
+      .populate({ path: 'owner', select: '_id first_name photos' })
+      .populate({ path: 'questions', select: '-right_answer -right_answers' })
+      .exec();
+
+    if (!test) {
+      throw new HttpException(
+        'Document (Test) not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    // if (String(_id) !== String(test.owner._id)) {
+    //   throw new HttpException(
+    //     'You are not owner of this test',
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // }
+
+    return test;
+  }
+
+  async getTestByIdWithTokenCheck(id: string, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+
+    const test = await this.getTestById(id);
+
+    if (String(_id) !== String(test.owner._id)) {
+      throw new HttpException(
+        'You are not owner of this test',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return test;
+  }
+
+  async createTest(dto: CreateTestDto, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+
+    const { lesson_id } = dto;
+    const lesson = await this.courseService.getLessonById(lesson_id);
+    const test = await this.testModel.create({
+      ...dto,
+      owner: _id,
+      lesson: lesson._id,
+    });
+
+    return this.getTestById(test._id);
+  }
+
+  async changeTest(id: string, dto: ChangeTestDto, token: string) {
+    const { _id } = await this.authService.getUserInfo(token);
+    const test = await this.getTestById(id);
+
+    const update = { ...omit(dto, 'lesson_id') };
+
+    const { lesson_id } = dto;
+    if (lesson_id) {
+      const lesson = await this.courseService.getLessonById(lesson_id);
+      update['lesson'] = lesson._id;
+    }
+
+    if (String(_id) !== String(test.owner._id)) {
+      throw new HttpException(
+        'You are not owner of this test',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    await test.updateOne({ ...update });
+
+    return this.getTestById(id);
+  }
+
+  async addQuestionToTest(
+    id: string,
+    query: AddQuestionToTestQueryDto,
+    token: string,
+  ) {
+    const { _id } = await this.authService.getUserInfo(token);
+
+    const test = await this.getTestById(id);
+
+    if (String(_id) !== String(test.owner._id)) {
+      throw new HttpException(
+        'You are not owner of this test',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const questionIds = Array.isArray(query['question-id'])
+      ? query['question-id']
+      : [query['question-id']];
+
+    for (const questionId of questionIds) {
+      const question = await this.getQuestionById(questionId);
+
+      if (String(question.owner._id) !== String(_id)) {
+        throw new HttpException(
+          'You are not owner of this quest',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (
+        test.questions.some((que) => String(que._id) === String(questionId))
+      ) {
+        throw new HttpException(
+          `You already added this question to the test. Problem id is - ${questionId}`,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
+    await test.updateOne({
+      $addToSet: {
+        questions: questionIds.map((que) => new Types.ObjectId(que)),
+      },
+    });
+    return this.getTestById(id);
+  }
+
+  async removeQuestionFromTest(
+    id: string,
+    query: AddQuestionToTestQueryDto,
+    token: string,
+  ) {
+    const { _id } = await this.authService.getUserInfo(token);
+
+    const test = await this.getTestById(id);
+
+    if (String(_id) !== String(test.owner._id)) {
+      throw new HttpException(
+        'You are not owner of this test',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    const questionIds = Array.isArray(query['question-id'])
+      ? query['question-id']
+      : [query['question-id']];
+
+    for (const questionId of questionIds) {
+      const question = await this.getQuestionById(questionId);
+
+      if (String(question.owner._id) !== String(_id)) {
+        throw new HttpException(
+          'You are not owner of this quest',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (
+        !test.questions.some((que) => String(que._id) === String(questionId))
+      ) {
+        throw new HttpException(
+          `The question you are trying to delete does not belong in this test. Problem id is - ${questionId}`,
+          HttpStatus.FORBIDDEN,
+        );
+      }
+    }
+
+    await test.updateOne({
+      $pull: {
+        questions: questionIds.map((que) => new Types.ObjectId(que)),
+      },
+    });
+    return this.getTestById(id);
+  }
+
+  async getTestByLessonId(id: string) {
+    const test = await this.testModel
+      .findOne({ lesson: new Types.ObjectId(String(id)) })
+      .select('-progress')
+      .populate({ path: 'owner', select: '_id first_name photos' })
+      .populate({ path: 'questions', select: '-right_answer -right_answers' })
+      .exec();
+
+    // if (!test) {
+    //   throw new HttpException(
+    //     'Document (Test) not found',
+    //     HttpStatus.NOT_FOUND,
+    //   );
+    // }
+    return test;
   }
 }
