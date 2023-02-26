@@ -702,6 +702,9 @@ export class CourseService {
     if (query.q) {
       filter['$or'] = [{ name: { $regex: query.q, $options: 'i' } }];
     }
+    if (query['sort-by']) {
+      sort[query['sort-by']] = query['sort-order'] === 'asc' ? 1 : -1;
+    }
 
     const courses = await this.courseModel
       .find({ ...filter })
@@ -717,7 +720,6 @@ export class CourseService {
     const total = await this.courseModel.countDocuments({ ...filter }).exec();
     const { _id } = await this.authService.getUserInfo(token);
 
-    console.log(courses);
     return {
       data: courses.map((course) => ({
         ...omit(course, ['students']),
