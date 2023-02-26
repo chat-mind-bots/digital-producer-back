@@ -195,7 +195,7 @@ export class CourseService {
 
   // LESSONS
 
-  async getLessonByIdWithTest(id: string) {
+  async getLessonByIdWithTest(id: string, token: string) {
     const lesson = await this.courseLessonModel
       .findById(id)
       .populate({
@@ -215,6 +215,7 @@ export class CourseService {
     return {
       ...lesson,
       test: await this.testService.getTestByLessonId(id),
+      ...(await this.testService.getUserProgress(id, token)),
     };
   }
 

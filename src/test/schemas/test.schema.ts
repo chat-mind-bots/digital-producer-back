@@ -35,6 +35,7 @@ export interface IProgress {
   status: ProgressStatusEnum;
   answers: IProgressAnswer[];
   duration: number;
+  result?: number;
   user: string;
 }
 @Schema()

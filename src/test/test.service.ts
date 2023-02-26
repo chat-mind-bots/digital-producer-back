@@ -358,7 +358,6 @@ export class TestService {
     );
 
     const doneAnswers: IProgressAnswer[] = [];
-    // const resultObj = {};
     let resultCounter = 0;
     if (status === ProgressStatusEnum.DONE) {
       for (const answer of answers) {
@@ -409,6 +408,31 @@ export class TestService {
     return updatedTest.progress[0];
   }
 
-  // await test.updateOne({ $addToSet: { progress: dto }})
-  // }
+  async getUserProgress(lessonId: string, token: string) {
+    const { _id: userId } = await this.authService.getUserInfo(token);
+
+    const test = await this.testModel
+      .findOne({ lesson: new Types.ObjectId(String(lessonId)) })
+      .select({ progress: { $elemMatch: { user: userId } } })
+      .select('questions')
+      .exec();
+
+    if (!test) {
+      return {};
+    }
+    if (test.progress[0]?.status !== ProgressStatusEnum.DONE) {
+      return {
+        test_status: test.progress[0]?.status,
+      };
+    }
+
+    const allQuestions = test.questions?.length;
+    const rightAnswers = test.progress[0]?.result;
+
+    return {
+      total_questions: allQuestions,
+      total_points: rightAnswers,
+      test_status: test.progress[0]?.status,
+    };
+  }
 }

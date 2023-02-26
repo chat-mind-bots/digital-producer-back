@@ -160,8 +160,10 @@ export class CourseController {
   @Roles(UserRoleEnum.USER)
   @UsePipes(MongoIdPipe)
   @Get('lesson/:id')
-  async getCourseLesson(@Param('id') id: string) {
-    return this.courseService.getLessonByIdWithTest(id);
+  async getCourseLesson(@Req() req, @Param('id') id: string) {
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.courseService.getLessonByIdWithTest(id, token);
   }
 
   @ApiOperation({ summary: 'Change course lesson' })
