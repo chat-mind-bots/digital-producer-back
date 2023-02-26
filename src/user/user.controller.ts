@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/user.schema';
 import { RequestUsersArrayType } from './types/request-array.type';
 import { UserGetQueryDto } from 'src/user/dto/query/user-get-query.dto';
+import { UserGetByUsernameQueryDto } from 'src/user/dto/query/user-get-by-username-query.dto';
 
 @Controller('user')
 @ApiTags('user')
@@ -69,10 +70,18 @@ export class UserController {
 
   @ApiOperation({ summary: 'Get users list' })
   @ApiResponse({ status: 200, type: RequestUsersArrayType })
-  @Roles(UserRoleEnum.PRODUCER)
+  @Roles(UserRoleEnum.ADMIN)
   @Get()
   async getUsers(@Query() query: UserGetQueryDto) {
     const { q, offset, limit } = query;
     return this.userService.findAll(limit, offset, q);
+  }
+
+  @ApiOperation({ summary: 'Get user by user name. Only full match' })
+  @ApiResponse({ status: 200, type: User })
+  @Roles(UserRoleEnum.PRODUCER)
+  @Get('by-username')
+  async getUserByUserName(@Query() query: UserGetByUsernameQueryDto) {
+    return this.userService.findByUserName(query.q);
   }
 }
