@@ -24,7 +24,7 @@ export class TestService {
   async getTestById(id: string) {
     const test = await this.testModel.findById(id).populate({
       path: 'owner',
-      select: '_id first_name',
+      select: '_id first_name photos',
     });
     if (!test) {
       throw new HttpException(
