@@ -20,16 +20,16 @@ export class BotUpdate {
   @Public()
   @Start()
   async startCommand(ctx: Context) {
+    if (ctx.chat.type !== 'private') {
+      return;
+    }
     const oldUser = await this.userService.findByTGId(ctx.from.id);
     if (oldUser) {
-      await ctx.sendMessage(
-        `Hi, ${oldUser.first_name}, your role is ${oldUser.role}`,
-        {
-          reply_markup: {
-            keyboard: [[{ text: 'Получить токен' }]],
-          },
+      await ctx.sendMessage(`Hi, ${oldUser.first_name}`, {
+        reply_markup: {
+          keyboard: [[{ text: 'Получить токен' }]],
         },
-      );
+      });
       return;
     }
     const info = await ctx.getChat();
@@ -68,25 +68,24 @@ export class BotUpdate {
   @Public()
   @On('message')
   async messageHandler(@Message('text') msg: string, @Ctx() ctx: Context) {
-    if (isPrivate(ctx.chat.type)) {
-      const { from } = ctx.message;
-      if (msg === 'Получить токен') {
-        const user = await this.userService.findByTGId(from.id);
-        const { access_token } = await this.authService.login(
-          user.first_name,
-          user.tg_id,
-          user.role,
-        );
-        const href = `${process.env.FRONT_URL}/auth/${access_token}`;
-        await ctx.reply(
-          `Ваша ссылка для входа: ${
-            process.env.MODE === 'DEVELOP' ? href : ''
-          }`,
-          process.env.MODE !== 'DEVELOP'
-            ? Markup.inlineKeyboard([Markup.button.url(href, href)])
-            : {},
-        );
-      }
+    if (!isPrivate(ctx.chat.type)) {
+      return;
+    }
+    const { from } = ctx.message;
+    if (msg === 'Получить токен') {
+      const user = await this.userService.findByTGId(from.id);
+      const { access_token } = await this.authService.login(
+        user.first_name,
+        user.tg_id,
+        user.role,
+      );
+      const href = `${process.env.FRONT_URL}/auth/${access_token}`;
+      await ctx.reply(
+        `Ваша ссылка для входа: ${process.env.MODE === 'DEVELOP' ? href : ''}`,
+        process.env.MODE !== 'DEVELOP'
+          ? Markup.inlineKeyboard([Markup.button.url(href, href)])
+          : {},
+      );
     }
     return;
   }
