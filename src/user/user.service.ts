@@ -4,11 +4,13 @@ import { User, UserDocument } from 'src/user/user.schema';
 import { Model } from 'mongoose';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
+import { BotService } from 'src/bot/bot.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly botService: BotService,
   ) {}
 
   async findByTGId(tg_id: number) {
@@ -39,12 +41,22 @@ export class UserService {
   async updateUserRole(id: string, role: UserRoleEnum) {
     const user = await this.findById(id);
     await user.updateOne({ $addToSet: { role: role } });
+    await this.botService.sendMessage(
+      user.tg_id,
+      `Вы были повышены до ${role}. Для  активации изменений подождите 24 часа`,
+      false,
+    );
     return await this.findById(id);
   }
 
   async beatUserRole(id: string, role: UserRoleEnum) {
     const user = await this.findById(id);
     await user.updateOne({ $pull: { role: role } });
+    await this.botService.sendMessage(
+      user.tg_id,
+      `Вас понизили. Теперь у вас нет роли ${role}.`,
+      false,
+    );
     return await this.findById(id);
   }
 
