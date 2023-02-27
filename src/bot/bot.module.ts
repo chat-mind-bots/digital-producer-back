@@ -18,5 +18,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   providers: [BotService, BotUpdate],
   controllers: [BotController],
+  exports: [BotService],
 })
 export class BotModule {}
