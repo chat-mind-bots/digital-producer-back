@@ -7,8 +7,7 @@
         "inputs": {
             "type": "object",
             "properties": {},
-            "required": [],
-            "JWT_SECRET_KEY": "SuperCecretKey"
+            "required": []
         }
     },
     "additionalProperties": false
