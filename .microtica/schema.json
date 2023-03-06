@@ -8,14 +8,7 @@
             "type": "object",
             "properties": {},
             "required": [],
-            "MyCustomVar": {
-                "TELEGRAM_API_KEY": "5610001786:AAH4WCVh7lzbN0Eqc4f9p5mVU8jRu-kgMXs",
-                "TELEGRAM_API_NAME": "mol_dp_bot",
-                "MODE": "DEVELOP",
-                "MONGO_URI": "mongodb+srv://kurkul608:5OLgGn0NWbvWJprT@cluster0.hz3sjak.mongodb.net/mol-dp?retryWrites=true&w=majority",
-                "JWT_SECRET_KEY": "supersecretkey",
-                "FRONT_URL": "http://localhost:3000"
-            }
+            "JWT_SECRET_KEY": "SuperCecretKey"
         }
     },
     "additionalProperties": false
