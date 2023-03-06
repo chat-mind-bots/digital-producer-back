@@ -40,7 +40,7 @@ export class TestService {
   async getQuestionById(id: string) {
     const question = await this.questionModel.findById(id).populate({
       path: 'owner',
-      select: '_id first_name photos',
+      select: '_id first_name username photos',
     });
     if (!question) {
       throw new HttpException(
@@ -121,7 +121,7 @@ export class TestService {
     const test = await this.testModel
       .findById(id)
       .select('-progress')
-      .populate({ path: 'owner', select: '_id first_name photos' })
+      .populate({ path: 'owner', select: '_id first_name username photos' })
       .populate({ path: 'questions' })
       .exec();
     if (!test) {
@@ -139,7 +139,7 @@ export class TestService {
     const test = await this.testModel
       .findById(id)
       .select('-progress')
-      .populate({ path: 'owner', select: '_id first_name photos' })
+      .populate({ path: 'owner', select: '_id first_name username photos' })
       .populate({ path: 'questions', select: '-right_answer -right_answers' })
       .exec();
 
@@ -311,7 +311,7 @@ export class TestService {
     const test = await this.testModel
       .findOne({ lesson: new Types.ObjectId(String(id)) })
       .select('-progress')
-      .populate({ path: 'owner', select: '_id first_name photos' })
+      .populate({ path: 'owner', select: '_id first_name username photos' })
       .populate({ path: 'questions', select: '-right_answer -right_answers' })
       .exec();
 
