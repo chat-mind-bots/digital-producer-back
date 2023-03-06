@@ -736,7 +736,9 @@ export class CourseService {
     if (query['status']) {
       if (role.some((role) => role === UserRoleEnum.ADMIN)) {
         filter['status'] = query['status'];
-      } else if (filter['owner']?.some((id) => String(id) === String(_id))) {
+      } else if (
+        filter['owner']?.$in?.some((id) => String(id) === String(_id))
+      ) {
         filter['status'] = query['status'];
       } else {
         throw new HttpException(
