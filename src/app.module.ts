@@ -19,6 +19,9 @@ import { CourseModule } from './course/course.module';
 import { DocumentModule } from './document/document.module';
 import { TestModule } from './test/test.module';
 import { ConfigModule as ConfigAppModule } from './config/config.module';
+import { FileModule } from './file/file.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -29,6 +32,11 @@ import { ConfigModule as ConfigAppModule } from './config/config.module';
         connection.plugin(require('mongoose-autopopulate'));
         return connection;
       },
+    }),
+    MulterModule.registerAsync({
+      useFactory: () => ({
+        dest: './upload',
+      }),
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
@@ -52,6 +60,8 @@ import { ConfigModule as ConfigAppModule } from './config/config.module';
     DocumentModule,
     TestModule,
     ConfigAppModule,
+    FileModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [
