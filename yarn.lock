@@ -6320,6 +6320,11 @@ nestjs-i18n@^10.2.6:
     js-yaml "^4.1.0"
     string-format "^2.0.0"
 
+nestjs-s3@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/nestjs-s3/-/nestjs-s3-1.0.1.tgz#dfe47fae937857d0f86b7e1ad2a9433ae8c3bf45"
+  integrity sha512-c7xnTcQZHZM3Hdw+Zl0PAgvpVjG4OmdxGFDtyUESXmumt0ZjA7xdUUQ6BgfKmd0eo4AT9LOrjGuSJUPOJgIdkw==
+
 nestjs-telegraf@^2.6.3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/nestjs-telegraf/-/nestjs-telegraf-2.6.3.tgz#cb8100354a697ca8c87542f8777d9b5a1165049e"
