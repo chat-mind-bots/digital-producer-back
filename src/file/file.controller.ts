@@ -1,30 +1,29 @@
 import {
+  BadRequestException,
   Controller,
-  Get,
-  ParseFilePipe,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
-  Request,
-  Param,
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from 'src/file/file.service';
+import { imageFileFilter } from 'src/file/validators/image.validator';
+import { videoFileFilter } from 'src/file/validators/video.validator';
+import { documentValidator } from 'src/file/validators/document.validator';
 
 @Controller('file')
 @ApiTags('file')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  @ApiOperation({ summary: 'upload file' })
+  @ApiOperation({ summary: 'upload image' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        // comment: { type: 'string' },
-        // outletId: { type: 'integer' },
         file: {
           type: 'string',
           format: 'binary',
@@ -32,45 +31,97 @@ export class FileController {
       },
     },
   })
-  @Post('upload')
-  // @FileSizeValidationPipe()
-  // @UseInterceptors(
-  //   FileInterceptor('file', {
-  //     storage: diskStorage({
-  //       destination: './files',
-  //       filename(
-  //         req,
-  //         file: Express.Multer.File,
-  //         callback: (error: Error | null, filename: string) => void,
-  //       ) {
-  //         const uniqSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  //         const ext = extname(file.originalname);
-  //         const fileName = `${file.originalname}-${uniqSuffix}${ext}`;
-  //
-  //         callback(null, fileName);
-  //       },
-  //     }),
-  //   }),
-  // )
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Request() req) {
-    // console.log(file);
-    return this.fileService.uploadFile(file.buffer, file.originalname);
+  @Post('image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 20971520,
+      },
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async uploadImage(
+    @UploadedFile()
+    file: Express.Multer.File,
+    @Req() req,
+  ) {
+    if (!file || req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError || 'Invalid file');
+    }
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.fileService.uploadImage(file.buffer, file.originalname, token);
   }
 
-  // @ApiOperation({ summary: 'getBucket' })
-  // @Get('bucket')
-  // getBuckets() {
-  //   return this.fileService.getBucketList();
-  // }
-  // @ApiOperation({ summary: 'getBucket' })
-  // @Post('bucket')
-  // createBucket() {
-  //   return this.fileService.createBucket();
-  // }
-  // @ApiOperation({ summary: 'get file' })
-  // @Get(':key')
-  // getFile(@Param('key') key: string) {
-  //   return this.fileService.getFile(key);
-  // }
+  @ApiOperation({ summary: 'upload video' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @Post('video')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 209715200,
+      },
+      fileFilter: videoFileFilter,
+    }),
+  )
+  async uploadVideo(
+    @UploadedFile()
+    file: Express.Multer.File,
+    @Req() req,
+  ) {
+    if (!file || req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError || 'Invalid file');
+    }
+
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.fileService.uploadVideo(file.buffer, file.originalname, token);
+  }
+
+  @ApiOperation({ summary: 'upload video' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @Post('video')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 20971520,
+      },
+      fileFilter: documentValidator,
+    }),
+  )
+  async uploadDocument(
+    @UploadedFile()
+    file: Express.Multer.File,
+    @Req() req,
+  ) {
+    if (!file || req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError || 'Invalid file');
+    }
+
+    const bearer = req.headers.authorization;
+    const token = bearer.split('Bearer ')[1];
+    return this.fileService.uploadVideo(file.buffer, file.originalname, token);
+  }
 }
