@@ -89,7 +89,7 @@ export class FileController {
     return this.fileService.uploadVideo(file.buffer, file.originalname, token);
   }
 
-  @ApiOperation({ summary: 'upload video' })
+  @ApiOperation({ summary: 'upload documents' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -102,7 +102,7 @@ export class FileController {
       },
     },
   })
-  @Post('video')
+  @Post('document')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: {
