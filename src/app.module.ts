@@ -20,7 +20,6 @@ import { DocumentModule } from './document/document.module';
 import { TestModule } from './test/test.module';
 import { ConfigModule as ConfigAppModule } from './config/config.module';
 import { FileModule } from './file/file.module';
-import { MulterModule } from '@nestjs/platform-express';
 import { S3Module } from 'nestjs-s3';
 
 @Module({
@@ -32,11 +31,6 @@ import { S3Module } from 'nestjs-s3';
         connection.plugin(require('mongoose-autopopulate'));
         return connection;
       },
-    }),
-    MulterModule.registerAsync({
-      useFactory: () => ({
-        dest: './upload',
-      }),
     }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
