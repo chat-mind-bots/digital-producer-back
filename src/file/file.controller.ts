@@ -12,6 +12,8 @@ import { FileService } from 'src/file/file.service';
 import { imageFileFilter } from 'src/file/validators/image.validator';
 import { videoFileFilter } from 'src/file/validators/video.validator';
 import { documentValidator } from 'src/file/validators/document.validator';
+import { Roles } from 'src/auth/roles-auth.decorator';
+import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 
 @Controller('file')
 @ApiTags('file')
@@ -40,6 +42,7 @@ export class FileController {
       fileFilter: imageFileFilter,
     }),
   )
+  @Roles(UserRoleEnum.PRODUCER)
   async uploadImage(
     @UploadedFile()
     file: Express.Multer.File,
@@ -75,6 +78,7 @@ export class FileController {
       fileFilter: videoFileFilter,
     }),
   )
+  @Roles(UserRoleEnum.PRODUCER)
   async uploadVideo(
     @UploadedFile()
     file: Express.Multer.File,
@@ -111,6 +115,7 @@ export class FileController {
       fileFilter: documentValidator,
     }),
   )
+  @Roles(UserRoleEnum.PRODUCER)
   async uploadDocument(
     @UploadedFile()
     file: Express.Multer.File,
