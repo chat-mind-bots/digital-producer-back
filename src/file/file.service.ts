@@ -1,62 +1,48 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { S3 } from 'aws-sdk';
 import * as sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
+import { InjectS3, S3 } from 'nestjs-s3';
 
 @Injectable()
 export class FileService {
-  constructor() {}
-  // async uploadFile(req): Promise<any> {
-  //   const promises = [];
-  //
-  //   return new Promise((resolve, reject) => {
-  //     const mp = req.multipart(handler, onEnd);
-  //
-  //     function onEnd(err) {
-  //       if (err) {
-  //         reject(new HttpException(err, 500));
-  //       } else {
-  //         Promise.all(promises).then(
-  //           (data) => {
-  //             resolve({ result: 'OK' });
-  //           },
-  //           (err) => {
-  //             reject(new HttpException(err, 500));
-  //           },
-  //         );
-  //       }
-  //     }
-  //
-  //     function handler(field, file, filename, encoding, mimetype: string) {
-  //       if (mimetype && mimetype.match(/^image\/(.*)/)) {
-  //         const imageType = mimetype.match(/^image\/(.*)/)[1];
-  //         const s3Stream = new S3({
-  //           accessKeyId: 'minio',
-  //           secretAccessKey: 'minio123',
-  //           endpoint: 'http://127.0.0.1:9001',
-  //           s3ForcePathStyle: true, // needed with minio?
-  //           signatureVersion: 'v4',
-  //         });
-  //         const promise = s3Stream
-  //           .upload({
-  //             Bucket: 'test',
-  //             Key: `200x200_${filename}`,
-  //             Body: file.pipe(sharp().resize(200, 200)[imageType]()),
-  //           })
-  //           .promise();
-  //         promises.push(promise);
-  //       }
-  //       const s3Stream = new S3({
-  //         accessKeyId: 'minio',
-  //         secretAccessKey: 'minio123',
-  //         endpoint: 'http://127.0.0.1:9001',
-  //         s3ForcePathStyle: true, // needed with minio?
-  //         signatureVersion: 'v4',
-  //       });
-  //       const promise = s3Stream
-  //         .upload({ Bucket: 'test', Key: filename, Body: file })
-  //         .promise();
-  //       promises.push(promise);
-  //     }
-  //   });
-  // }
+  constructor(@InjectS3() private readonly s3: S3) {}
+  async createBucket() {
+    await this.s3.createBucket({ Bucket: 'bucket' }).promise();
+    return this.getBucketList();
+  }
+  async getBucketList() {
+    const list = await this.s3.listBuckets().promise();
+    return list;
+  }
+
+  async uploadFile(dataBuffer: Buffer, filename: string) {
+    const uploadResult = await this.s3
+      .upload({
+        Bucket: process.env.S3_DOCUMENTS_BUCKET,
+        Body: dataBuffer,
+        Key: `${uuidv4()}_${filename}`,
+        ACL: 'public-read',
+      })
+      .promise();
+
+    return {
+      key: uploadResult.Key,
+      // url: uploadResult.Location,
+      url: `${process.env.S3_DOMAIN}/${process.env.S3_DOCUMENTS_BUCKET}/${uploadResult.Key}`,
+    };
+  }
+
+  async getFile(key: string) {
+    // const params = {
+    //   Bucket: 'BucketName',
+    //   Key: 'ObjectName',
+    // };
+    const response = await this.s3
+      .getObject({
+        Bucket: process.env.S3_DOCUMENTS_BUCKET,
+        Key: key,
+      })
+      .promise();
+    return response.Body;
+  }
 }
