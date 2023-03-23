@@ -42,6 +42,7 @@ import { RequestCourseArrayType } from 'src/course/type/request-course-array.typ
 import { GetCoursesQueryDto } from 'src/course/dto/query/get-courses-query.dto';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 import { UpdateCourseStatusQueryDto } from 'src/course/dto/query/update-course-status-query.dto';
+import { GetCourseQueryDto } from 'src/course/dto/query/get-course-query.dto';
 
 @Controller('course')
 @ApiTags('course')
@@ -358,10 +359,14 @@ export class CourseController {
   @Roles(UserRoleEnum.USER)
   @UsePipes(MongoIdPipe)
   @Get(':id')
-  async getCourse(@Req() req, @Param('id') id: string) {
+  async getCourse(
+    @Req() req,
+    @Param('id') id: string,
+    @Query() query: GetCourseQueryDto,
+  ) {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.courseService.getCourseWithUpdateId(id, token);
+    return this.courseService.getCourseWithUpdateId(id, token, query);
   }
 
   @ApiOperation({ summary: 'Change course' })

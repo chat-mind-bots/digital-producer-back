@@ -41,6 +41,7 @@ import { TestService } from 'src/test/test.service';
 import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-course-query.dto';
 import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
+import { GetCourseQueryDto } from 'src/course/dto/query/get-course-query.dto';
 
 @Injectable()
 export class CourseService {
@@ -511,7 +512,11 @@ export class CourseService {
     return course;
   }
 
-  async getCourseWithUpdateId(id: string, token: string) {
+  async getCourseWithUpdateId(
+    id: string,
+    token: string,
+    query: GetCourseQueryDto,
+  ) {
     const course = await this.courseModel
       .findById(id)
       .populate({
@@ -539,15 +544,84 @@ export class CourseService {
     }
 
     const { _id } = await this.authService.getUserInfo(token);
-
+    const students =
+      String(_id) === String(course.owner._id)
+        ? await this.getStudentsWithTotal(
+            id,
+            query['students-offset'],
+            query['students-limit'],
+          )
+        : {};
     return {
-      ...omit(course, ['students']),
+      ...(String(_id) === String(course.owner._id)
+        ? { ...course, ...students }
+        : omit(course, ['students'])),
       is_enrolled: !!course.students?.some(
         (st_id) => String(st_id) === String(_id),
       ),
       category: (course.sub_category as unknown as CourseSubCategory)?.category,
       sub_category: course.sub_category?._id,
     };
+  }
+
+  async getStudentsWithTotal(
+    courseId: string,
+    offset = 0,
+    limit = 15,
+  ): Promise<{ students: any[]; students_total: number }> {
+    const [course, students_total] = await Promise.all([
+      this.courseModel
+        .findById(courseId, {
+          students: { $slice: [offset, limit] },
+        })
+        .populate({
+          path: 'students',
+          select: '_id first_name username photos',
+        }),
+      this.courseModel
+        .aggregate([
+          {
+            $match: { _id: new Types.ObjectId(courseId) },
+          },
+          {
+            $project: {
+              students_total: { $size: '$students' },
+            },
+          },
+        ])
+        .exec(),
+    ]);
+    return {
+      students: course?.students ?? [],
+      students_total: students_total[0]?.students_total ?? 0,
+    };
+    // const [students, students_total] = await Promise.all([
+    //   this.courseModel
+    //     .find({}, { students: { $slice: [offset, limit] }, _id: 0, title: 0 })
+    //     .distinct('students'),
+    //   this.courseModel
+    //     .aggregate([
+    //       {
+    //         $project: {
+    //           students_total: { $size: '$students' },
+    //         },
+    //       },
+    //     ])
+    //     .exec(),
+    // ]);
+    // return { students, students_total: students_total[0]?.students_total ?? 0 };
+
+    // const [students, students_total] = await Promise.all([
+    //   this.courseModel
+    //     .find({}, { students: { $slice: [offset, limit] } })
+    //     .populate({
+    //       path: 'students',
+    //       select: '_id first_name username photos',
+    //     })
+    //     .exec(),
+    //   this.courseModel.countDocuments().exec(),
+    // ]);
+    // return { students, students_total };
   }
 
   async getCourseByIdWithTokenCheck(id: string, token: string) {
