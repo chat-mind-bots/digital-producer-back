@@ -42,6 +42,8 @@ import { EnrollUserToCourseQueryDto } from 'src/course/dto/query/enroll-user-to-
 import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 import { GetCourseQueryDto } from 'src/course/dto/query/get-course-query.dto';
+import { BotService } from 'src/bot/bot.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class CourseService {
@@ -64,6 +66,10 @@ export class CourseService {
     private readonly tagsService: TagsService,
     @Inject(forwardRef(() => TestService))
     private readonly testService: TestService,
+    @Inject(forwardRef(() => BotService))
+    private readonly botService: BotService,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
   ) {}
 
   // CATEGORIES
@@ -913,6 +919,17 @@ export class CourseService {
     await course.updateOne({
       $addToSet: { students: userIdsArray.map((id) => new Types.ObjectId(id)) },
     });
+
+    for (const userId of userIdsArray) {
+      const user = await this.userService.findById(userId);
+      if (user) {
+        await this.botService.sendMessage(
+          user.tg_id,
+          `Вы были добавлены на курс - ${course.name}`,
+          false,
+        );
+      }
+    }
 
     return this.getCourseById(id);
   }
