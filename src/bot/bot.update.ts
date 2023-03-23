@@ -6,6 +6,11 @@ import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 import { Public } from 'src/auth/public-route.decorator';
 import { isPrivate } from 'src/bot/bot.utils';
 import { AuthService } from 'src/auth/auth.service';
+import {
+  defaultKeyboard,
+  DefaultKeyboard,
+} from 'src/bot/keyboards/default.keyboard';
+import { authKeyboard } from 'src/bot/keyboards/auth.keyboard';
 
 @Update()
 export class BotUpdate {
@@ -25,11 +30,7 @@ export class BotUpdate {
     }
     const oldUser = await this.userService.findByTGId(ctx.from.id);
     if (oldUser) {
-      await ctx.sendMessage(`Hi, ${oldUser.first_name}`, {
-        reply_markup: {
-          keyboard: [[{ text: 'Получить токен' }]],
-        },
-      });
+      await ctx.sendMessage(`Hi, ${oldUser.first_name}`, defaultKeyboard());
       return;
     }
     const info = await ctx.getChat();
@@ -57,11 +58,10 @@ export class BotUpdate {
       type,
       photos,
     });
-    await ctx.sendMessage(`Hi, ${user.first_name}, your role is ${user.role}`, {
-      reply_markup: {
-        keyboard: [[{ text: 'Получить токен' }]],
-      },
-    });
+    await ctx.sendMessage(
+      `Hi, ${user.first_name}, your role is ${user.role}`,
+      defaultKeyboard(),
+    );
     return;
   }
 
@@ -72,7 +72,7 @@ export class BotUpdate {
       return;
     }
     const { from } = ctx.message;
-    if (msg === 'Получить токен') {
+    if (msg === DefaultKeyboard.ENTER) {
       const user = await this.userService.findByTGId(from.id);
       const { access_token } = await this.authService.login(
         user.first_name,
@@ -82,9 +82,7 @@ export class BotUpdate {
       const href = `${process.env.FRONT_URL}/auth/${access_token}`;
       await ctx.reply(
         `Ваша ссылка для входа: ${process.env.MODE === 'DEVELOP' ? href : ''}`,
-        process.env.MODE !== 'DEVELOP'
-          ? Markup.inlineKeyboard([Markup.button.url(href, href)])
-          : {},
+        process.env.MODE !== 'DEVELOP' ? authKeyboard(href) : {},
       );
     }
     return;
