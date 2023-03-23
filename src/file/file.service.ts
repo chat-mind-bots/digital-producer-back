@@ -5,8 +5,6 @@ import { extname } from 'path';
 import { InjectModel } from '@nestjs/mongoose';
 import { File, FileDocument } from 'src/file/file.schema';
 import { Model } from 'mongoose';
-import { TagsService } from 'src/tags/tags.service';
-import { UserService } from 'src/user/user.service';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateFileDto } from 'src/file/dto/create-file.dto';
 
@@ -28,28 +26,46 @@ export class FileService {
     return list;
   }
 
-  async uploadImage(dataBuffer: Buffer, filename: string, token: string) {
+  async uploadImage(
+    dataBuffer: Buffer,
+    filename: string,
+    fileSize: number,
+    token: string,
+  ) {
     return this.uploadFile(
       dataBuffer,
       filename,
+      fileSize,
       process.env.S3_IMAGE_BUCKET,
       token,
     );
   }
 
-  async uploadVideo(dataBuffer: Buffer, filename: string, token: string) {
+  async uploadVideo(
+    dataBuffer: Buffer,
+    filename: string,
+    fileSize: number,
+    token: string,
+  ) {
     return this.uploadFile(
       dataBuffer,
       filename,
+      fileSize,
       process.env.S3_VIDEO_BUCKET,
       token,
     );
   }
 
-  async uploadDocument(dataBuffer: Buffer, filename: string, token: string) {
+  async uploadDocument(
+    dataBuffer: Buffer,
+    filename: string,
+    fileSize: number,
+    token: string,
+  ) {
     return this.uploadFile(
       dataBuffer,
       filename,
+      fileSize,
       process.env.S3_DOCUMENTS_BUCKET,
       token,
     );
@@ -58,6 +74,7 @@ export class FileService {
   async uploadFile(
     dataBuffer: Buffer,
     filename: string,
+    fileSize: number,
     bucket: string,
     token: string,
   ) {
@@ -78,6 +95,7 @@ export class FileService {
       bucket: uploadResult.Bucket,
       location: uploadResult.Location,
       domain: process.env.S3_DOMAIN,
+      file_size: fileSize,
       url,
     };
 

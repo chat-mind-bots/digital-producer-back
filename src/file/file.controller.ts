@@ -53,7 +53,12 @@ export class FileController {
     }
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.fileService.uploadImage(file.buffer, file.originalname, token);
+    return this.fileService.uploadImage(
+      file.buffer,
+      file.originalname,
+      file.size,
+      token,
+    );
   }
 
   @ApiOperation({ summary: 'upload video' })
@@ -90,7 +95,12 @@ export class FileController {
 
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.fileService.uploadVideo(file.buffer, file.originalname, token);
+    return this.fileService.uploadVideo(
+      file.buffer,
+      file.originalname,
+      file.size,
+      token,
+    );
   }
 
   @ApiOperation({ summary: 'upload documents' })
@@ -127,6 +137,11 @@ export class FileController {
 
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.fileService.uploadVideo(file.buffer, file.originalname, token);
+    return this.fileService.uploadVideo(
+      file.buffer,
+      file.originalname,
+      file.size,
+      token,
+    );
   }
 }
