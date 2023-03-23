@@ -543,9 +543,10 @@ export class CourseService {
       );
     }
 
-    const { _id } = await this.authService.getUserInfo(token);
+    const { _id, role } = await this.authService.getUserInfo(token);
     const students =
-      String(_id) === String(course.owner._id)
+      String(_id) === String(course.owner._id) ||
+      role.includes(UserRoleEnum.ADMIN)
         ? await this.getStudentsWithTotal(
             id,
             query['students-offset'],

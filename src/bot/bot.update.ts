@@ -62,6 +62,9 @@ export class BotUpdate {
       `Hi, ${user.first_name}, your role is ${user.role}`,
       defaultKeyboard(),
     );
+    // await this.bot.telegram.setMyCommands([
+    //   { command: 'balance', description: 'отображает ваш баланс' },
+    // ]);
     return;
   }
 
