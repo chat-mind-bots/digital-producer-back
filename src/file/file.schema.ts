@@ -50,6 +50,13 @@ export class File {
   domain: string;
 
   @ApiProperty()
+  @Prop({
+    required: true,
+    type: Number,
+  })
+  file_size: number;
+
+  @ApiProperty()
   @Prop({ required: true, type: Types.ObjectId, ref: User.name })
   owner: Types.ObjectId;
 

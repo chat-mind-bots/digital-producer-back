@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateFileDto {
   @ApiProperty({
@@ -37,4 +37,10 @@ export class CreateFileDto {
   })
   @IsString()
   domain: string;
+
+  @ApiProperty({
+    required: true,
+  })
+  @IsNumber()
+  file_size: number;
 }
