@@ -1,4 +1,12 @@
-import { Ctx, InjectBot, Message, On, Start, Update } from 'nestjs-telegraf';
+import {
+  Ctx,
+  InjectBot,
+  Message,
+  On,
+  Start,
+  Update,
+  Command,
+} from 'nestjs-telegraf';
 import { Context, Markup, Telegraf } from 'telegraf';
 import { forwardRef, Inject } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
@@ -21,7 +29,26 @@ export class BotUpdate {
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
-
+  @Public()
+  @Command('link')
+  async linkCommand(ctx: Context) {
+    const { from } = ctx;
+    const user = await this.userService.findByTGId(from.id);
+    const { access_token } = await this.authService.login(
+      user.first_name,
+      user.tg_id,
+      user.role,
+    );
+    const href = `${process.env.FRONT_URL}/auth/${access_token}`;
+    await ctx.replyWithHTML(
+      `Твоя ссылка для входа - <a href="${href}">LINK</a>`,
+    );
+    await ctx.reply(
+      `Ваша ссылка для входа: ${process.env.MODE === 'DEVELOP' ? href : ''}`,
+      process.env.MODE !== 'DEVELOP' ? authKeyboard(href) : {},
+    );
+    return;
+  }
   @Public()
   @Start()
   async startCommand(ctx: Context) {
@@ -59,12 +86,9 @@ export class BotUpdate {
       photos,
     });
     await ctx.sendMessage(
-      `Hi, ${user.first_name}, your role is ${user.role}`,
+      `Привет, ${user.first_name}, твои актуальные роли на платформе - ${user.role}`,
       defaultKeyboard(),
     );
-    // await this.bot.telegram.setMyCommands([
-    //   { command: 'balance', description: 'отображает ваш баланс' },
-    // ]);
     return;
   }
 
@@ -74,7 +98,7 @@ export class BotUpdate {
     if (!isPrivate(ctx.chat.type)) {
       return;
     }
-    const { from } = ctx.message;
+    const { from } = ctx;
     if (msg === DefaultKeyboard.ENTER) {
       const user = await this.userService.findByTGId(from.id);
       const { access_token } = await this.authService.login(

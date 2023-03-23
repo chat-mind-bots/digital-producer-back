@@ -22,6 +22,7 @@ import { Course, CourseSchema } from 'src/course/schemas/course.schema';
 import { TagsModule } from 'src/tags/tags.module';
 import { TestModule } from 'src/test/test.module';
 import { UserModule } from 'src/user/user.module';
+import { BotModule } from 'src/bot/bot.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { UserModule } from 'src/user/user.module';
     forwardRef(() => TestModule),
     forwardRef(() => UserModule),
     forwardRef(() => TagsModule),
+    forwardRef(() => BotModule),
   ],
   providers: [CourseService],
   controllers: [CourseController],

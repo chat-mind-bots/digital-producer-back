@@ -4,7 +4,16 @@ import { Context, Telegraf } from 'telegraf';
 
 @Injectable()
 export class BotService {
-  constructor(@InjectBot() private readonly bot: Telegraf<Context>) {}
+  constructor(@InjectBot() private readonly bot: Telegraf<Context>) {
+    this.bot.telegram.setMyCommands([
+      {
+        command: 'start',
+        description: 'Начало работы бота/получения последних обновлений',
+      },
+      { command: 'link', description: 'Получить ссылку для входа' },
+    ]);
+  }
+
   async sendMessage(chatId: number, message: string, pinMessage: boolean) {
     await this.bot.telegram
       .sendMessage(chatId, message, { parse_mode: 'HTML' })
