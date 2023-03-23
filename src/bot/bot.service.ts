@@ -12,6 +12,8 @@ export class BotService {
       },
       { command: 'link', description: 'Получить ссылку для входа' },
     ]);
+    //TODO wait update of telegraf to API 6.6
+    // this.bot.telegram.setMyDescription('I am the bot');
   }
 
   async sendMessage(chatId: number, message: string, pinMessage: boolean) {
