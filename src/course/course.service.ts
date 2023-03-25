@@ -673,13 +673,23 @@ export class CourseService {
 
     const { tags: tagsDto, ...otherDto } = dto;
 
+    if (course.status === CurseStatusEnum.IN_REVIEW) {
+      throw new HttpException(
+        `It is not possible to edit the course while it is being checked`,
+        HttpStatus.FORBIDDEN,
+      );
+    }
     if (tagsDto) {
       const tagsFromDB = await this.tagsService.createManyTags(tagsDto);
       const tags = [];
       for (const tag of tagsFromDB) {
         tags.push(tag._id);
       }
-      await course.updateOne({ ...otherDto, tags });
+      await course.updateOne({
+        ...otherDto,
+        tags,
+        status: CurseStatusEnum.IN_PROGRESS,
+      });
     } else {
       await course.updateOne(otherDto);
     }
@@ -831,7 +841,13 @@ export class CourseService {
         );
       }
     }
-
+    if (query['hide-bought']) {
+      filter['students'] = {
+        ...filter['students'],
+        $nin: [new Types.ObjectId(_id)],
+      };
+    }
+    console.log(filter);
     const courses = await this.courseModel
       .find({ ...filter })
       .limit(query.limit)
