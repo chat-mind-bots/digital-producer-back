@@ -550,6 +550,7 @@ export class CourseService {
     }
 
     const { _id, role } = await this.authService.getUserInfo(token);
+
     const students =
       String(_id) === String(course.owner._id) ||
       role.includes(UserRoleEnum.ADMIN)
@@ -559,8 +560,10 @@ export class CourseService {
             query['students-limit'],
           )
         : {};
+
     return {
-      ...(String(_id) === String(course.owner._id)
+      ...(String(_id) === String(course.owner._id) ||
+      role.includes(UserRoleEnum.ADMIN)
         ? { ...course, ...students }
         : omit(course, ['students'])),
       is_enrolled: !!course.students?.some(
