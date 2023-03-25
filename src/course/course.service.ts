@@ -275,6 +275,11 @@ export class CourseService {
     const lesson = await this.getLessonByIdWithTokenCheck(id, token);
 
     await lesson.updateOne({ ...dto });
+    const module = await this.findModuleByLesson(id);
+
+    const course = await this.findCourseByModule(String(module._id));
+    await course.updateOne({ status: CurseStatusEnum.IN_PROGRESS });
+
     return this.getLessonById(id);
   }
 
@@ -443,6 +448,8 @@ export class CourseService {
 
     await module.updateOne({ ...dto });
 
+    const course = await this.findCourseByModule(id);
+    await course.updateOne({ status: CurseStatusEnum.IN_PROGRESS });
     return this.getModuleById(id);
   }
 
@@ -847,7 +854,6 @@ export class CourseService {
         $nin: [new Types.ObjectId(_id)],
       };
     }
-    console.log(filter);
     const courses = await this.courseModel
       .find({ ...filter })
       .limit(query.limit)
@@ -873,6 +879,19 @@ export class CourseService {
     };
   }
 
+  async findCourseByModule(moduleId: string) {
+    const course = await this.courseModel.findOne({
+      modules: { $in: [new Types.ObjectId(moduleId)] },
+    });
+    return course;
+  }
+
+  async findModuleByLesson(LessonId: string) {
+    const module = await this.courseModuleModel.findOne({
+      lessons: { $in: [new Types.ObjectId(LessonId)] },
+    });
+    return module;
+  }
   async enrollToCourse(id: string, token: string) {
     const { _id } = await this.authService.getUserInfo(token);
 

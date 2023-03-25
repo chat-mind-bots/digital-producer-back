@@ -137,7 +137,7 @@ export class FileController {
 
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    return this.fileService.uploadVideo(
+    return this.fileService.uploadDocument(
       file.buffer,
       file.originalname,
       file.size,
