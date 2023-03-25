@@ -1,8 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { IsValidId } from 'src/common/validators/query-object-id-validator.decorator';
 import { Transform } from 'class-transformer';
-import { toLowerCase, toNumber, trim } from 'src/common/helpers/query.helper';
+import {
+  toBoolean,
+  toLowerCase,
+  toNumber,
+  trim,
+} from 'src/common/helpers/query.helper';
 import { CurseSortByEnum } from 'src/course/enum/curse-sort-by.enum';
 import { CurseStatusEnum } from 'src/course/enum/curse-status.enum';
 
@@ -100,4 +111,15 @@ export class GetCoursesQueryDto {
   @IsEnum(CurseStatusEnum)
   @IsOptional()
   readonly status?: CurseStatusEnum;
+
+  @Transform(({ value }) => toBoolean(value))
+  @ApiProperty({
+    example: 'true',
+    description: 'hide bought courses',
+    required: false,
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  readonly 'hide-bought'?: boolean;
 }
