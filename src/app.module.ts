@@ -21,6 +21,8 @@ import { TestModule } from './test/test.module';
 import { ConfigModule as ConfigAppModule } from './config/config.module';
 import { FileModule } from './file/file.module';
 import { S3Module } from 'nestjs-s3';
+import { TaskModule } from './task/task.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -55,6 +57,7 @@ import { S3Module } from 'nestjs-s3';
         },
       }),
     }),
+    ScheduleModule.forRoot(),
     BotModule,
     BannerModule,
     TagsModule,
@@ -67,6 +70,7 @@ import { S3Module } from 'nestjs-s3';
     TestModule,
     ConfigAppModule,
     FileModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [
