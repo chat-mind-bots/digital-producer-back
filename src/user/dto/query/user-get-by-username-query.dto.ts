@@ -4,7 +4,7 @@ import { toLowerCase, trim } from 'src/common/helpers/query.helper';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserGetByUsernameQueryDto {
-  @Transform(({ value }) => trim(toLowerCase(value)))
+  @Transform(({ value }) => trim(value))
   @ApiProperty({
     example: 'John233',
     description: 'username of user',
