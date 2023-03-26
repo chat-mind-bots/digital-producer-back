@@ -1,30 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { UserRoleEnum } from 'src/user/enum/user-role.enum';
+import { IsObject, IsOptional, IsString } from 'class-validator';
 import { IPhotos, Photo } from 'src/user/user.schema';
 
-export class CreateUserDto {
-  @ApiProperty({
-    example: '10988',
-    description: 'telegram user id',
-    required: true,
-  })
-  @IsNumber()
-  readonly tg_id: number;
-
+export class UpdateUserDto {
   @ApiProperty({
     example: 'John Doe',
     description: 'telegram user name',
     required: true,
   })
+  @IsOptional()
   @IsString()
-  readonly first_name: string;
+  readonly first_name?: string;
 
   @ApiProperty({
     example: 'john_doe',
@@ -43,15 +29,6 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   readonly type?: string;
-
-  @ApiProperty({
-    example: UserRoleEnum.USER,
-    description: 'user role',
-    required: true,
-    enum: UserRoleEnum,
-  })
-  @IsArray()
-  readonly role: UserRoleEnum[];
 
   @ApiProperty({
     example: {

@@ -1,15 +1,23 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from 'src/user/user.schema';
 import { Model } from 'mongoose';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserRoleEnum } from 'src/user/enum/user-role.enum';
 import { BotService } from 'src/bot/bot.service';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @Inject(forwardRef(() => BotService))
     private readonly botService: BotService,
   ) {}
 
@@ -94,5 +102,20 @@ export class UserService {
       );
     }
     return user;
+  }
+
+  async updateUser(tg_id: number) {
+    const dto: UpdateUserDto = await this.botService.getChatInfo(tg_id);
+    await this.userModel.findOneAndUpdate({ tg_id }, { ...dto });
+    console.log(`uptdate-${tg_id}`);
+    return this.userModel.findOne({ tg_id });
+  }
+
+  async updateAllUsers() {
+    const users = await this.userModel.find().select('tg_id');
+    for (const user of users) {
+      await this.updateUser(user.tg_id);
+    }
+    return users;
   }
 }
