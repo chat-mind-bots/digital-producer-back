@@ -203,6 +203,7 @@ export class CourseService {
   // LESSONS
 
   async getLessonByIdWithTest(id: string, token: string) {
+    const { _id, role } = await this.authService.getUserInfo(token);
     const lesson = await this.courseLessonModel
       .findById(id)
       .populate({
@@ -219,6 +220,23 @@ export class CourseService {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    if (
+      String(_id) !== String(lesson.owner._id) &&
+      !role.includes(UserRoleEnum.ADMIN)
+    ) {
+      const module = await this.findModuleByLesson(id);
+      const course = await this.findCourseByModule(String(module._id));
+      if (
+        !course.students.find((student) => String(student._id) === String(_id))
+      ) {
+        throw new HttpException(
+          'You are not registered for this course',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    }
+
     return {
       ...lesson,
       test: await this.testService.getTestByLessonId(id),
@@ -402,7 +420,8 @@ export class CourseService {
 
   // MODULES
 
-  async getModuleById(id: string) {
+  async getModuleById(id: string, token: string) {
+    const { _id, role } = await this.authService.getUserInfo(token);
     const module = await this.courseModuleModel
       .findById(id)
       .populate({
@@ -420,12 +439,27 @@ export class CourseService {
         HttpStatus.NOT_FOUND,
       );
     }
+    if (
+      String(_id) !== String(module.owner._id) &&
+      !role.includes(UserRoleEnum.ADMIN)
+    ) {
+      const course = await this.findCourseByModule(id);
+      if (
+        !course.students.find((student) => String(student._id) === String(_id))
+      ) {
+        throw new HttpException(
+          'You are not registered for this course',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    }
+
     return module;
   }
 
   async getModuleByIdWithTokenCheck(id: string, token: string) {
     const { _id } = await this.authService.getUserInfo(token);
-    const module = await this.getModuleById(id);
+    const module = await this.getModuleById(id, token);
 
     if (String(_id) !== String(module.owner._id)) {
       throw new HttpException(
@@ -440,7 +474,7 @@ export class CourseService {
     const { _id } = await this.authService.getUserInfo(token);
 
     const module = await this.courseModuleModel.create({ ...dto, owner: _id });
-    return this.getModuleById(module._id);
+    return this.getModuleById(module._id, token);
   }
 
   async changeModule(id: string, dto: ChangeCourseModuleDto, token: string) {
@@ -450,7 +484,7 @@ export class CourseService {
 
     const course = await this.findCourseByModule(id);
     await course.updateOne({ status: CurseStatusEnum.IN_PROGRESS });
-    return this.getModuleById(id);
+    return this.getModuleById(id, token);
   }
 
   async removeModule(id: string, token: string) {
@@ -476,7 +510,7 @@ export class CourseService {
 
     const lesson = await this.getLessonById(lessonId);
     await module.updateOne({ lessons: [...module.lessons, lesson._id] });
-    return this.getModuleById(id);
+    return this.getModuleById(id, token);
   }
 
   async removeLessonFromModule(id: string, lessonId: string, token: string) {
@@ -494,7 +528,7 @@ export class CourseService {
 
     await this.removeLessonWithOutToken(lessonId);
 
-    return this.getModuleById(id);
+    return this.getModuleById(id, token);
   }
 
   // COURSES
