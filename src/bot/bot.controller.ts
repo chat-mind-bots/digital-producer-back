@@ -1,4 +1,9 @@
 import { Controller } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { BotService } from 'src/bot/bot.service';
 
 @Controller('bot')
-export class BotController {}
+@ApiTags('bot')
+export class BotController {
+  constructor(private readonly botService: BotService) {}
+}
