@@ -28,8 +28,10 @@ export class AuthService {
   }
 
   async getUserInfo(token: string) {
-    const { sub } = await this.jwtService.decode(token);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const { sub, roles } = await this.jwtService.decode(token);
     const user = await this.userService.findByTGId(sub);
-    return user;
+    return { ...user, role: roles };
   }
 }

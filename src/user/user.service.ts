@@ -22,7 +22,7 @@ export class UserService {
   ) {}
 
   async findByTGId(tg_id: number) {
-    const user = await this.userModel.findOne({ tg_id });
+    const user = await this.userModel.findOne({ tg_id }).lean();
     return user;
   }
 
