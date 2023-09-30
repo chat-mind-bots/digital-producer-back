@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
   });
-
+  console.log(process.env.MONGO_URI);
   const config = new DocumentBuilder()
     .setTitle('Swagger')
     .setDescription('API')
@@ -25,6 +25,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
-  await app.listen(5050);
+  await app.listen(3000);
 }
 bootstrap();
