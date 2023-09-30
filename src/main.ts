@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: true,
   });
-  console.log(process.env.MONGO_URI);
+
   const config = new DocumentBuilder()
     .setTitle('Swagger')
     .setDescription('API')
