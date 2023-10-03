@@ -39,13 +39,15 @@ export class BotUpdate {
       user.tg_id,
       user.role,
     );
-    const href = `${process.env.FRONT_URL}/auth/${access_token}`;
+    const href = `${process.env.MODE === 'LOCAL' ? 'http' : 'https'}://${
+      process.env.FRONT_URL
+    }/auth/${access_token}`;
     await ctx.replyWithHTML(
       `Твоя ссылка для входа - <a href="${href}">LINK</a>`,
     );
     await ctx.reply(
-      `Ваша ссылка для входа: ${process.env.MODE === 'DEVELOP' ? href : ''}`,
-      process.env.MODE !== 'DEVELOP' ? authKeyboard(href) : {},
+      `Ваша ссылка для входа: ${process.env.MODE === 'LOCAL' ? href : ''}`,
+      process.env.MODE !== 'LOCAL' ? authKeyboard(href) : {},
     );
     return;
   }
@@ -106,10 +108,15 @@ export class BotUpdate {
         user.tg_id,
         user.role,
       );
-      const href = `${process.env.FRONT_URL}/auth/${access_token}`;
+      const href = `${process.env.MODE === 'LOCAL' ? 'http' : 'https'}://${
+        process.env.FRONT_URL
+      }/auth/${access_token}`;
+      await ctx.replyWithHTML(
+        `Твоя ссылка для входа - <a href="${href}">LINK</a>`,
+      );
       await ctx.reply(
-        `Ваша ссылка для входа: ${process.env.MODE === 'DEVELOP' ? href : ''}`,
-        process.env.MODE !== 'DEVELOP' ? authKeyboard(href) : {},
+        `Ваша ссылка для входа: ${process.env.MODE === 'LOCAL' ? href : ''}`,
+        process.env.MODE !== 'LOCAL' ? authKeyboard(href) : {},
       );
     }
     return;
