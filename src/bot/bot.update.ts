@@ -39,7 +39,7 @@ export class BotUpdate {
       user.tg_id,
       user.role,
     );
-    const href = `${process.env.MODE === 'LOCAL' ? 'http' : 'https'}://${
+    const href = `${process.env.MODE === 'LOCAL' ? 'http' : 'https'}://app.${
       process.env.FRONT_URL
     }/auth/${access_token}`;
     await ctx.replyWithHTML(
@@ -108,7 +108,7 @@ export class BotUpdate {
         user.tg_id,
         user.role,
       );
-      const href = `${process.env.MODE === 'LOCAL' ? 'http' : 'https'}://${
+      const href = `${process.env.MODE === 'LOCAL' ? 'http' : 'https'}://app.${
         process.env.FRONT_URL
       }/auth/${access_token}`;
       await ctx.replyWithHTML(
