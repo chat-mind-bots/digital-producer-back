@@ -80,7 +80,7 @@ export class FileService {
     fileSize: number,
     bucket: string,
     token: string,
-    domain?: string,
+    domain: string,
   ) {
     const uploadResult = await this.s3
       .upload({
@@ -91,7 +91,7 @@ export class FileService {
       })
       .promise();
 
-    const url = `${domain && process.env.S3_DOMAIN}/${uploadResult.Key}`;
+    const url = `${domain}/${uploadResult.Key}`;
 
     const dto: CreateFileDto = {
       e_tag: uploadResult.ETag,
