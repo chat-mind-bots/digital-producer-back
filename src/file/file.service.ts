@@ -38,6 +38,7 @@ export class FileService {
       fileSize,
       process.env.S3_IMAGE_BUCKET,
       token,
+      process.env.S3_DOMAIN_IMAGES,
     );
   }
 
@@ -53,6 +54,7 @@ export class FileService {
       fileSize,
       process.env.S3_VIDEO_BUCKET,
       token,
+      process.env.S3_DOMAIN_VIDEO,
     );
   }
 
@@ -68,6 +70,7 @@ export class FileService {
       fileSize,
       process.env.S3_DOCUMENTS_BUCKET,
       token,
+      process.env.S3_DOMAIN_DOCUMENTS,
     );
   }
 
@@ -77,6 +80,7 @@ export class FileService {
     fileSize: number,
     bucket: string,
     token: string,
+    domain?: string,
   ) {
     const uploadResult = await this.s3
       .upload({
@@ -87,7 +91,7 @@ export class FileService {
       })
       .promise();
 
-    const url = `${process.env.S3_DOMAIN}/${bucket}/${uploadResult.Key}`;
+    const url = `${domain && process.env.S3_DOMAIN}/${uploadResult.Key}`;
 
     const dto: CreateFileDto = {
       e_tag: uploadResult.ETag,
