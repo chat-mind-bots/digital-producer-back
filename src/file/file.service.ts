@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { InjectS3, S3 } from 'nestjs-s3';
 import { extname } from 'path';
@@ -55,6 +61,7 @@ export class FileService {
       process.env.S3_VIDEO_BUCKET,
       token,
       process.env.S3_DOMAIN_VIDEO,
+      2e10, //20 GB to Bytes
     );
   }
 
@@ -81,7 +88,34 @@ export class FileService {
     bucket: string,
     token: string,
     domain: string,
+    maxTotalSize?: number,
   ) {
+    const { _id: owner } = await this.authService.getUserInfo(token);
+
+    if (maxTotalSize) {
+      const aggregateResult = await this.fileModel.aggregate([
+        {
+          $match: {
+            domain: domain,
+            owner: owner,
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalSize: { $sum: '$file_size' },
+          },
+        },
+      ]);
+
+      if (
+        aggregateResult.length > 0 &&
+        aggregateResult[0].totalSize > maxTotalSize
+      ) {
+        throw new HttpException(`Memory limit exceeded`, HttpStatus.FORBIDDEN);
+      }
+    }
+
     const uploadResult = await this.s3
       .upload({
         Bucket: bucket,
@@ -98,7 +132,7 @@ export class FileService {
       key: uploadResult.Key,
       bucket: uploadResult.Bucket,
       location: uploadResult.Location,
-      domain: process.env.S3_DOMAIN,
+      domain,
       file_size: fileSize,
       url,
     };
