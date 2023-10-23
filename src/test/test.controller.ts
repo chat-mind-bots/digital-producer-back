@@ -172,7 +172,6 @@ export class TestController {
   ) {
     const bearer = req.headers.authorization;
     const token = bearer.split('Bearer ')[1];
-    // console.log(dto);
     return this.testService.addProgressToTest(id, dto, token);
   }
 }

@@ -107,7 +107,6 @@ export class UserService {
   async updateUser(tg_id: number) {
     const dto: UpdateUserDto = await this.botService.getChatInfo(tg_id);
     await this.userModel.findOneAndUpdate({ tg_id }, { ...dto });
-    console.log(`uptdate-${tg_id}`);
     return this.userModel.findOne({ tg_id });
   }
 
