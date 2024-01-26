@@ -3,6 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import * as process from 'process';
 // import { ValidationPipe } from 'src/pipes/validation.pipe';
 
 async function bootstrap() {
@@ -21,7 +22,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  process.env.MODE !== 'PROD' && SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 

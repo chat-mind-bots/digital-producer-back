@@ -309,7 +309,7 @@ export class CourseService {
       documents.map(({ _id }) => String(_id)),
     );
 
-    const result = await lesson.remove();
+    const result = await lesson.deleteOne();
     return result;
   }
 
@@ -321,7 +321,7 @@ export class CourseService {
       documents.map(({ _id }) => String(_id)),
     );
 
-    const result = await lesson.remove();
+    const result = await lesson.deleteOne();
     return result;
   }
 

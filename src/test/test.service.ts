@@ -109,7 +109,7 @@ export class TestService {
   async removeQuestion(id: string, token: string) {
     const question = await this.getQuestionWithToken(id, token);
 
-    const result = await question.remove();
+    const result = await question.deleteOne();
     return result;
   }
 
