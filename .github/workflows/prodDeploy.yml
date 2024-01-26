@@ -1,0 +1,32 @@
+name: Prod Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code from the 'master' branch
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+
+      # Install SSH client
+      - name: Install SSH client
+        run: sudo apt-get install -y openssh-client
+
+      # Connect to the server and run the updateDev.sh script
+      - name: Deploy to Server
+        env:
+          SERVER_IP: ${{ secrets.JOIN_IP }}
+          SSH_USER: ${{ secrets.JOIN_USER }}
+          SSH_PASSWORD: ${{ secrets.JOIN_PASSWORD }}
+        run: |
+          sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} "cd ~/chat-bot-deploy && bash updateDev.sh"
