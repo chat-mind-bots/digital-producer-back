@@ -29,4 +29,4 @@ jobs:
           SSH_USER: ${{ secrets.JOIN_USER }}
           SSH_PASSWORD: ${{ secrets.JOIN_PASSWORD }}
         run: |
-          sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} "cd ~/chat-bot-deploy && bash updateDev.sh"
+          sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SERVER_IP} "cd ~/digital-producer-deploy && bash updateDev.sh"
