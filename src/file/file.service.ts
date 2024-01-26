@@ -125,7 +125,7 @@ export class FileService {
       })
       .promise();
 
-    const url = `${domain}/${uploadResult.Key}`;
+    const url = `https://${domain}/${uploadResult.Key}`;
 
     const dto: CreateFileDto = {
       e_tag: uploadResult.ETag,
