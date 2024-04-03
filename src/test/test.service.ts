@@ -130,6 +130,7 @@ export class TestService {
         HttpStatus.NOT_FOUND,
       );
     }
+
     return test;
   }
 
@@ -252,11 +253,12 @@ export class TestService {
       }
     }
 
-    await test.updateOne({
-      $addToSet: {
-        questions: questionIds.map((que) => new Types.ObjectId(que)),
+    const update = {
+      $push: {
+        questions: { $each: questionIds.map((que) => new Types.ObjectId(que)) },
       },
-    });
+    };
+    await test.updateOne(update);
     return this.getTestById(id);
   }
 

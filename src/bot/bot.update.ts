@@ -59,6 +59,7 @@ export class BotUpdate {
     }
     const oldUser = await this.userService.findByTGId(ctx.from.id);
     if (oldUser) {
+      await this.userService.updateUser(ctx.from.id);
       await ctx.sendMessage(`Hi, ${oldUser.first_name}`, defaultKeyboard());
       return;
     }
