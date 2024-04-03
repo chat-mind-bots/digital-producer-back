@@ -337,7 +337,8 @@ export class CourseService {
       );
     }
     const document = await this.documentService.getDocumentById(documentId);
-    await lesson.updateOne({ documents: [...lesson.documents, document._id] });
+    const update = { $push: { documents: document._id } };
+    await lesson.updateOne(update);
     return this.getLessonById(id);
   }
 
@@ -509,7 +510,9 @@ export class CourseService {
     }
 
     const lesson = await this.getLessonById(lessonId);
-    await module.updateOne({ lessons: [...module.lessons, lesson._id] });
+    const update = { $push: { lessons: lesson._id } };
+    await module.updateOne(update);
+
     return this.getModuleById(id, token);
   }
 
@@ -769,7 +772,8 @@ export class CourseService {
     }
 
     const document = await this.documentService.getDocumentById(documentId);
-    await course.updateOne({ documents: [...course.documents, document._id] });
+    const update = { $push: { documents: document._id } };
+    await course.updateOne(update);
     return this.getCourseById(id);
   }
 
@@ -807,7 +811,8 @@ export class CourseService {
 
     const module = await this.getModuleByIdWithTokenCheck(moduleId, token);
 
-    await course.updateOne({ modules: [...course.modules, module._id] });
+    const update = { $push: { modules: module._id } };
+    await course.updateOne(update);
     return this.getCourseById(id);
   }
 

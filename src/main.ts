@@ -22,7 +22,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  process.env.MODE !== 'PRODUCTION' &&
+  (process.env.MODE !== 'PRODUCTION' ||
+    process.env.FRONT_URL === 'course.lat') &&
     SwaggerModule.setup('api', app, document);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
